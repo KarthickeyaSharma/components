@@ -17,6 +17,7 @@ import {
 const {height, width} = Dimensions.get('window');
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Feather from 'react-native-vector-icons/Feather';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MIcon from 'react-native-vector-icons/MaterialIcons';
 // import RNMinimizeApp from 'react-native-minimize';
 import NetInfo from '@react-native-community/netinfo';
@@ -32,7 +33,7 @@ import back from '../../assets/book1.png';
 
 import {WebView} from 'react-native-webview';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+var ScriptStyle = '';
 const options = {
   title: 'Pick an Image',
   takePhotoButtonTitle: 'Take a Photo',
@@ -347,7 +348,7 @@ class FrontPage extends Component {
               global.isPreview = true; //false;
               this.setjsonData('online');
             }
-            console.log('leftPage' in JSON.parse(result)[index]);
+           // console.log('leftPage' in JSON.parse(result)[index]);
           }
           if (CategoryName == 'Invitations') {
             setTimeout(() => {
@@ -369,7 +370,7 @@ class FrontPage extends Component {
     // }))
   }
 
-  setjsonData(type) {
+  setjsonData = async type => {
     if (type == 'online') {
       AsyncStorage.getItem('pdc_designs').then(designs => {
         var d = designs ? JSON.parse(designs) : [];
@@ -379,13 +380,74 @@ class FrontPage extends Component {
     } else {
       // global.isResumed = true;
     }
+
+    // console.log(this.state.selectedJson);
+    var Jsonselected = this.state.selectedJson;
+    if (Jsonselected != '' || Jsonselected != null) {
+      for (var pid in Jsonselected.objects) {
+        if (Jsonselected.objects[pid]['fontFamily'] != undefined) {
+          var replacefontFamily = Jsonselected.objects[pid]['fontFamily'];
+          replacefontFamily = replacefontFamily.replace('"', '');
+          replacefontFamily = replacefontFamily.replace('"', '');
+          // alert(Jsonselected.objects[pid]['fontFamily']);
+
+          await fetch(
+            'https://haati.serverguy.cloud/rest/V1/product/pdp/fonts/post?fonts=' +
+              replacefontFamily,
+            {
+              method: 'POST',
+            },
+          )
+            .then(response => response.json())
+            .then(JsonResponse1 => {
+              if (JsonResponse1 != '[]' && JsonResponse1 != undefined) {
+                ScriptStyle +=
+                  '@font-face {' +
+                  "font-family: '" +
+                  replacefontFamily +
+                  "';" +
+                  "src: url('" +
+                  JSON.parse(JsonResponse1)[0].path +
+                  "');" +
+                  '}' +
+                  'div {' +
+                  'font-family: ' +
+                  replacefontFamily +
+                  ';' +
+                  '}';
+
+                JsonResponse1 = JSON.parse(JsonResponse1);
+                console.log(ScriptStyle);
+              }
+            });
+
+          Jsonselected.objects[pid]['fontFamily'] = replacefontFamily;
+        }
+        if (Jsonselected.objects[pid]['type'] == 'i-text') {
+          Jsonselected.objects[pid]['type'] = 'Textbox';
+        }
+      }
+    }
+
+    var pdcLocal = this.state.local_pdc;
+    if (pdcLocal != '' || pdcLocal != null) {
+      for (var pid in pdcLocal.objects) {
+        // console.log(pid);
+        // console.log(test.objects[pid]['type'], 'pids');
+        if (pdcLocal.objects[pid]['type'] == 'i-text') {
+          pdcLocal.objects[pid]['type'] = 'Textbox';
+        }
+      }
+    }
+
+    console.log(Jsonselected);
+
+    // var objs = this.state.selectedJson.json['objects'];
     this.setState({
-      jsonData: JSON.stringify(
-        type == 'online' ? this.state.selectedJson : this.state.local_pdc,
-      ),
+      jsonData: JSON.stringify(type == 'online' ? Jsonselected : pdcLocal),
       show: false,
     });
-  }
+  };
 
   ComponentWillMount() {
     // RNMinimizeApp.minimizeApp();
@@ -409,9 +471,9 @@ class FrontPage extends Component {
             <Image source={HaatiText} style={styles.title}></Image>
           </View>
           <View style={styles.w30}>
-            <TouchableOpacity onPress={() => this.checkPreview()}>
+            {/* <TouchableOpacity onPress={() => this.checkPreview()}>
               <Text style={[styles.backText, {color: '#E280AA'}]}>Preview</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         </View>
 
@@ -560,11 +622,11 @@ class FrontPage extends Component {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
           style={styles.mainContainer}>
-          <View>
+          {/* <View>
             <Text style={styles.mainText}>Front Cover</Text>
-          </View>
+          </View> */}
 
-          <View style={styles.textContainer}>
+          {/* <View style={styles.textContainer}>
             <View>
               <TouchableOpacity>
                 <Image
@@ -595,7 +657,7 @@ class FrontPage extends Component {
             )}
             <View style={{}}>
               <TouchableOpacity
-                onPress={() => {
+                onPress={() => {    
                   this.props.navigation.navigate('BackPage');
                 }}>
                 <Image
@@ -606,13 +668,13 @@ class FrontPage extends Component {
               </TouchableOpacity>
               <Text style={styles.imgText}>Back</Text>
             </View>
-          </View>
+          </View> */}
           {/* 1stbox */}
           <View style={styles.customizeContainer}>
             {this.state.selectedJson !== null ? (
               <WebView
-                onLoadStart={() => {
-                  console.log('Start');
+                onLoadStart={() => {     
+                  console.log('Start');      
                 }}
                 onLoadEnd={() => console.log('end')}
                 userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36"
@@ -620,10 +682,14 @@ class FrontPage extends Component {
                 source={{
                   html: `<html>
                   <head>
-                    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/1.7.22/fabric.min.js"></script>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/3.2.0/fabric.min.js"></script>
                     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
                     <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
                   </head>
+                  <style>
+                  ${ScriptStyle} 
+</style>
+
                   <style type="text/css">
                     #canvas2json, #addtocart, #myTextArea, #span, #alterImg, #myMenu {
                       display: none;
@@ -653,7 +719,7 @@ class FrontPage extends Component {
                       </div>
                       <br />
                       
-                      <button id='alterImg' onclick="openGallery()">Alter Image</button>
+                      
                       <button id='addtocart'>addtocart</button>
                       <button id='canvas2json'>2JSON</button>
                       <textarea id='myTextArea' onfocus="this.select();" onmouseup="return false;"></textarea>
@@ -672,6 +738,7 @@ class FrontPage extends Component {
                     <script>
 
                       function openGallery() {
+                        
                         if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                             navigator.mediaDevices.getUserMedia({ video: true });
                         }
@@ -705,19 +772,101 @@ class FrontPage extends Component {
                             $('#myMenu').css({'top': curY, 'left': curX}).fadeIn('slow');
                           }        
                         });
+
+
+
+                        var _wrapLine = function(_line, lineIndex, desiredWidth, reservedSpace) {
+                          var lineWidth = 0,
+                              splitByGrapheme = this.splitByGrapheme,
+                              graphemeLines = [],
+                              line = [],
+                              words = splitByGrapheme ? fabric.util.string.graphemeSplit(_line) : _line.split(this._wordJoiners),
+                              word = '',
+                              offset = 0,
+                              infix = splitByGrapheme ? '' : ' ',
+                              wordWidth = 0,
+                              infixWidth = 0,
+                              largestWordWidth = 0,
+                              lineJustStarted = true,
+                              additionalSpace = splitByGrapheme ? 0 : this._getWidthOfCharSpacing();
+                              
+                          reservedSpace = reservedSpace || 0;
+                          desiredWidth -= reservedSpace;
+                          for (var i = 0; i < words.length; i++) {
+                              word = fabric.util.string.graphemeSplit(words[i]);
+                              wordWidth = this._measureWord(word, lineIndex, offset);
+                              offset += word.length;
+                              
+                              if (this.breakWords && wordWidth >= desiredWidth) {
+                              
+                                if (!lineJustStarted) {
+                                    line.push(infix);
+                                      lineJustStarted = true;
+                                  }
+                                
+                                  for (var w = 0; w < word.length; w++) {
+                                    var letter = word[w];
+                                      var letterWidth = this.getMeasuringContext().measureText(letter).width * this.fontSize / this.CACHE_FONT_SIZE;
+                                      if (lineWidth + letterWidth > desiredWidth) {
+                                        graphemeLines.push(line);
+                                          line = [];
+                                          lineWidth = 0;
+                                      } else {
+                                        line.push(letter);
+                                          lineWidth += letterWidth;
+                                      }
+                                  }
+                                  word = [];
+                              } else {
+                                lineWidth += infixWidth + wordWidth - additionalSpace;
+                              }
+                      
+                              if (lineWidth >= desiredWidth && !lineJustStarted) {
+                                  graphemeLines.push(line);
+                                  line = [];
+                                  lineWidth = wordWidth;
+                                  lineJustStarted = true;
+                              } else {
+                                  lineWidth += additionalSpace;
+                              }
+                      
+                              if (!lineJustStarted) {
+                                  line.push(infix);
+                              }
+                              line = line.concat(word);
+                      
+                              infixWidth = this._measureWord([infix], lineIndex, offset);
+                              offset++;
+                              lineJustStarted = false;
+                              if (wordWidth > largestWordWidth && !this.breakWords) {
+                                  largestWordWidth = wordWidth;
+                              }
+                          }
+                      
+                          i && graphemeLines.push(line);
+                      
+                          if (largestWordWidth + reservedSpace > this.dynamicMinWidth) {
+                              this.dynamicMinWidth = largestWordWidth - additionalSpace + reservedSpace;
+                          }
+                      
+                          return graphemeLines;
+                      };
+                      
+                      
+                      fabric.util.object.extend(fabric.Textbox.prototype, {
+                         _wrapLine: _wrapLine,
+                      });
                         
-                        var originalRender = fabric.IText.prototype._render;
-                        fabric.IText.prototype._render = function (ctx) {
+                        var originalRender = fabric.Textbox.prototype._render;
+                        fabric.Textbox.prototype._render = function(ctx) {
                           originalRender.call(this, ctx);
-
-                          var w = this.width * this.scaleX,
-                            h = this.height * this.scaleY,
-                            x = -this.width * this.scaleX / 2,
-                            y = -this.height * this.scaleY / 2;
-
+                          
+                          
+                          var w = this.width,
+                            h = this.height,
+                            x = -this.width / 2,
+                            y = -this.height / 2;
                           ctx.beginPath();
-                          ctx.setLineDash([2, 3]);
-                          ctx.scale(1 / this.scaleX, 1 / this.scaleY);
                           ctx.moveTo(x, y);
                           ctx.lineTo(x + w, y);
                           ctx.lineTo(x + w, y + h);
@@ -726,21 +875,10 @@ class FrontPage extends Component {
                           ctx.closePath();
                           var stroke = ctx.strokeStyle;
                           ctx.strokeStyle = "#EF80B1";
-                          ctx.lineWidth = 2;
                           ctx.stroke();
                           ctx.strokeStyle = stroke;
-                          ctx.fillStyle = '#EF80B1';
-                          ctx.font = '10px';
-                          ctx.strokeUniform = true;
-                          ctx.fillRect(x, y - 20, 20, 20);
-
-                          ctx.lineWidth = 1;
-                          ctx.fillStyle = '#000000';
-                          ctx.font = '20px Bentham';
-                          ctx.textAlign = "center";
-                          ctx.fillText("T", x + 4, y - 3);
                         }
-
+                        canvas.renderAll();
                         fabric.Cropzoomimage = fabric.util.createClass(fabric.Image,
                           {
                             type: 'cropzoomimage',
@@ -748,13 +886,18 @@ class FrontPage extends Component {
                             initialize: function (element, options) {
                               options || (options = {});
                               this.callSuper('initialize', element, options);
-                              this.set({
-                                orgSrc: element.src,
-                                cx: 0,
-                                cy: 0,
-                                cw: element.width,
-                                ch: element.height
-                              });
+                              if(this.name!=undefined) {
+                                this.set({
+                                  orgSrc: element.src,
+                  opacity:0.3,
+                  cx: 0,
+                                  cy: 0,
+                                  cw: element.width,
+                  lockMovementY: true,
+                  lockMovementx: true,
+                                  ch: element.height
+                                });
+                  }
                             },
 
                             zoomBy: function (x, y, z, callback) {
@@ -784,6 +927,7 @@ class FrontPage extends Component {
                             },
 
                             rerender: function (callback) {
+                              
                               var img = new Image(), obj = this;
                               img.crossOrigin = "Anonymous";
                               img.onload = function () {
@@ -819,47 +963,129 @@ class FrontPage extends Component {
                             }
                           });
 
-                        fabric.Cropzoomimage.async = true;
-                        fabric.Cropzoomimage.fromObject = function (object, callback) {
-                          fabric.util.loadImage(object.src, function (img) {
-                            fabric.Image.prototype._initFilters.call(object, object, function (filters) {
-                              object.filters = filters || [];
-                              var instance = new fabric.Cropzoomimage(img, object);
-                              if (callback) { callback(instance); }
-                            });
-                          }, null, object.crossOrigin);
-                        };
-
-                        var originalRender2 = fabric.IText.prototype._initDimensions;
-                        fabric.IText.prototype._initDimensions = function (ctx) {
-                          originalRender2.call(this, ctx);
-
-                          if (this.__skipDimension) {
-                            return;
-                          }
-
-                          if (this.txtw != 1) {
-                            this.mwidth = this.width;
-                            this.mheight = this.height;
-                            this.txtw = 1;
-                            this.fsize = this.fontSize;
-                            this.cheight = this._getTextHeight(ctx);
-                          }
-
-                          this.cheight = this._getTextHeight(ctx);
-                          if (this.cheight > (this.mheight) && this.fontSize <= this.fsize) {
-                            this.fontSize -= 2;
-                            this.height = this.mheight;
-                          } else if (this.cheight < this.mheight && this.fontSize < this.fsize) {
-                            this.height = this.mheight;
-                          }
+                          fabric.Image.fromObject = function(object, callback) {
+                            fabric.util.loadImage(object.src, function(img, error) {
+                              if (error) {
+                                callback && callback(null, error);
+                                return;
+                              }
+                              fabric.Image.prototype._initFilters.call(object, object.filters, function(filters) {
+                                object.filters = filters || [];
+                                fabric.Image.prototype._initFilters.call(object, [object.resizeFilter], function(resizeFilters) {
+                                  object.resizeFilter = resizeFilters[0];
+                                  if (typeof object.version === 'undefined') {
+                                    var elWidth = img.naturalWidth || img.width;
+                                    var elHeight = img.naturalHeight || img.height;
+                                    var scaleX = (object.scaleX || 1) * object.width / elWidth;
+                                    var scaleY = (object.scaleY || 1) * object.height / elHeight;
+                                    object.width = elWidth;
+                                    object.height = elHeight;
+                                    object.scaleX = scaleX;
+                                    object.scaleY = scaleY;
+                                  }
+                                  var image = new fabric.Image(img, object);
+                                  callback(image);
+                                });
+                              });
+                            }, null, object.crossOrigin);
+                          };
 
 
+
+                          fabric.Cropzoomimage.async = true;
+                          fabric.Cropzoomimage.fromObject = function (object, callback) {
+                            
+                            fabric.util.loadImage(object.src, function(img, error) {
+                             if (error) {
+                               callback && callback(null, error);
+                               return;
+                             }
+                              fabric.Image.prototype._initFilters.call(object, object.filters, function (filters) {
+                                object.filters = filters || [];
+                          fabric.Image.prototype._initFilters.call(object, [object.resizeFilter], function(resizeFilters) {
+                                 object.resizeFilter = resizeFilters[0];
+                                 if (typeof object.version === 'undefined') {
+                                   var elWidth = img.naturalWidth || img.width;
+                                   var elHeight = img.naturalHeight || img.height;
+                                   var scaleX = (object.scaleX || 1) * object.width / elWidth;
+                                   var scaleY = (object.scaleY || 1) * object.height / elHeight;
+                                   object.width = elWidth;
+                                   object.height = elHeight;
+                                   object.scaleX = scaleX;
+                                   object.scaleY = scaleY;
+                                 }
+                                var instance = new fabric.Cropzoomimage(img, object);
+                                if (callback) { callback(instance); }
+                              });
+                             }); 
+                            }, null, object.crossOrigin);
+                          };
+
+                        fabric.Textbox.prototype._clearTextArea =  function(ctx) {
+                          var width = this.width + this.fontSize * this.scaleX, height = this.height + 4;
+                          ctx.clearRect(-width / 2, -height / 2, width, height);
                         }
-                        fabric.IText.prototype.onKeyDown = (function (onKeyDown) {
+                       
+
+
+                        var originalRender2 = fabric.Textbox.prototype.initDimensions;
+      fabric.Textbox.prototype.initDimensions = function (ctx) {
+        originalRender2.call(this, ctx);
+
+        if (this.__skipDimension) {
+          return;
+        }
+
+        if (this.txtw != 1) {
+          this.mwidth = this.width;
+          this.mheight = this.height;
+          this.txtw = 1;
+          this.fsize = this.fontSize;
+		  this.breakWords=true;
+
+          
+		  this.cheight = this.calcTextHeight();
+		  
+
+        }
+
+        
+		this.cheight = this.calcTextHeight();
+		
+		console.log("ch"+this.cheight);
+		console.log("mh"+this.mheight);
+
+		if (this.cwidth > (this.mwidth) && this.fontSize <= this.fsize) {
+          this.fontSize -= 1;
+		  this.width=this.mwidth;
+          this.height = this.mheight;
+
+
+        }
+        else if (this.cheight > (this.mheight) && this.fontSize <= this.fsize) {
+          this.fontSize -= 1;
+          this.height = this.mheight;
+
+
+        } else if (this.cheight < this.mheight && this.fontSize < this.fsize) {
+          //this.fontSize += 2;
+          this.height = this.mheight;
+
+        }
+         else {
+          this.height=this.mheight;
+          
+          }
+
+
+
+      }
+	  
+
+
+                        fabric.Textbox.prototype.onKeyDown = (function (onKeyDown) {
                           return function (e) {
-                            console.log(e.keyCode);
-                            console.log(e.key);
+                            console.log(e.keyCode); 
                             console.log(this.fontSize);
                             console.log(this.fsize);
                             if (e.keyCode == 13 && this.cheight > (this.mheight)) {
@@ -873,7 +1099,7 @@ class FrontPage extends Component {
 
                             onKeyDown.call(this, e);
                           }
-                        })(fabric.IText.prototype.onKeyDown)
+                        })(fabric.Textbox.prototype.onKeyDown)
 
                         $('.my-context button').click(function(){
                           var imgObj = canvas.getActiveObject();
@@ -946,6 +1172,11 @@ class FrontPage extends Component {
                         canvas.on('mouse:up', function (opts) {
                           var selectedObj = opts.target;
                           canvas.setActiveObject(opts.target);
+                           opts.target.lockSkewingY = true;
+                          opts.target.lockSkewingX = true;
+                          opts.target.lockMovementY = true;
+                          opts.target.lockMovementX = true;
+                          
                           console.log(canvas.getActiveObject().get('type'));
                           canvas.renderAll();
                           if (canvas.getActiveObject().get('type') === "cropzoomimage") {
@@ -958,7 +1189,7 @@ class FrontPage extends Component {
                               obj.cy = 0;
                             }
                           }
-                          if (canvas.getActiveObject().get('type') === "i-text") {
+                          if (canvas.getActiveObject().get('type') === "textbox") {
                             var obj = canvas.getActiveObject();
                             obj.enterEditing();
                             if (obj.txtw != 1) {
@@ -972,9 +1203,27 @@ class FrontPage extends Component {
                           }
                   
                         });
-                        canvas.on('mouse:up', function (opts) {
-                      })
-                        
+                        canvas.on('mouse:over', function(opts) {
+                          var selectedObj = opts.target;
+                          canvas.setActiveObject(opts.target);
+                          console.log(canvas.getActiveObject().get('type'));
+                          canvas.renderAll();
+                      });
+
+
+                      canvas.on('mouse:down', function(opts) {
+                        var selectedObj = opts.target;
+                        canvas.setActiveObject(opts.target);
+                        console.log(canvas.getActiveObject().get('type'));
+                        if (canvas.getActiveObject().get('type')=='cropzoomimage') {
+                            openGallery();
+                        } else if (canvas.getActiveObject().get('type')=='i-text') {
+                            opts.target.enterEditing();
+                        }
+                        canvas.renderAll();
+                    });
+
+
                         $('#span').change(function (e) {
                           var file = e.target.files[0];
                           console.log(file);
@@ -990,30 +1239,25 @@ class FrontPage extends Component {
                   
                             console.log(canvas.getActiveObject().get('type'));
                             if (canvas.getActiveObject().get('type') === "cropzoomimage") {
-                              $('.preloader').css('display','block');
-                              var formData = new FormData();
-                              formData.append('base64', file.target.result);
-                              fetch('https://haati.serverguy.cloud/rest/V1/base64/images', { method: 'POST',body: formData})
-                                    .then(response => response.json())
-                                    .then(JsonResponse => { 
-                                      var imgObject = JSON.parse(JsonResponse);
-                                      console.log(imgObject.image_url);
-                                      objs.isrc = imgObject.image_url;
-                                      objs.src = imgObject.image_url;
-                                      objs.orgSrc = imgObject.image_url;
-                                      objs.setSrc(imgObject.image_url, function(img) {
-                                        var scalex1 = wx / img.width;
-                                        var scaley1 = wy / img.height;
-                                        let det = scalex1 * img.width;
-                                        console.log("4 ->>", img.width * img.scaleX, scalex1,  det);
-                                        objs.set({
-                                            scaleY: scaley1,
-                                            scaleX:  scalex1,
-                                        });
-                                        canvas.renderAll();
-                                        $('.preloader').css('display','none');
-                                    });
+                              console.log(file.target.result);
+                              objs.opacity=1;
+                              objs.isrc = file.target.result;
+                              objs.src = file.target.result;
+                              objs.orgSrc = file.target.result;
+                              objs.setSrc(file.target.result, function(img) {
+                                  console.log(img,"helloImg");
+                                  var scalex1 = wx / img.width;
+                                  var scaley1 = wy / img.height;
+                                  let det = scalex1 * img.width;
+                                  console.log("4 ->>", img.width * img.scaleX, scalex1,  det);
+                                  objs.set({
+                                      scaleY: scaley1,
+                                      scaleX:  scalex1,
+                                  });
+                                  canvas.renderAll();
                               });
+                              $('.preloader').css('display','none');
+                              setTimeout(function(){ $("#canvas2json").click(); }, 2000);
                             }
                           }
                           reader1.readAsDataURL(file);
@@ -1055,7 +1299,7 @@ class FrontPage extends Component {
           </View>
 
           <View style={styles.btnContainer}>
-            <TouchableOpacity
+            {/* <TouchableOpacity
               onPress={() => {
                 this.zoomIn();
               }}>
@@ -1073,8 +1317,7 @@ class FrontPage extends Component {
               }}>
               <MIcon
                 name="add-photo-alternate"
-                size={40}
-                // color="#407BFF"
+                size={40} 
               />
             </TouchableOpacity>
             <TouchableOpacity
@@ -1083,36 +1326,76 @@ class FrontPage extends Component {
               }}>
               <Icons
                 name="content-save-outline"
-                size={40}
-                // color="#407BFF"
+                size={40} 
               />
-            </TouchableOpacity>
+            </TouchableOpacity>*/}
+          </View> 
+          <View>
+
+
+
+          <View style={styles.headerContainer1}>
+          <View style={styles.w25}>
+            {/* <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
+              <Text style={styles.backText}>Back</Text>
+            </TouchableOpacity> */}
           </View>
-          <View style={[styles.btnContainer, {marginBottom: 40}]}>
+          {/* <View style={{  width: wp('30%')}}> */}
+            
             <TouchableOpacity
               onPress={() => {
                 this.moveUp();
               }}>
-              <Feather name="arrow-up-circle" size={40} />
+              <FontAwesome name="circle" size={20} />
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-                this.moveDown();
+                this.moveUp();
               }}>
-              <Feather name="arrow-down-circle" size={40} />
+              <FontAwesome name="circle-o" size={20} />
             </TouchableOpacity>
             <TouchableOpacity
+              onPress={() => {
+                this.moveUp();
+              }}>
+              <FontAwesome name="circle-o" size={20} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                this.moveUp();
+              }}>
+              <FontAwesome name="circle-o" size={20} />
+            </TouchableOpacity>
+
+          {/* </View> */}
+          <View style={styles.w301}>
+            <TouchableOpacity onPress={() =>this.props.navigation.navigate('LeftPage')}>
+              <Text style={[styles.backText, {color: '#E280AA'}]}>NEXT</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+
+         
+          <View style={[styles.btnContainer1, {marginBottom: 10}]}>
+            
+            
+            {/* <TouchableOpacity
               onPress={() => {
                 this.moveLeft();
               }}>
               <Feather name="arrow-left-circle" size={40} />
-            </TouchableOpacity>
-            <TouchableOpacity
+            </TouchableOpacity> */}
+            {/* <TouchableOpacity
               onPress={() => {
                 this.moveRight();
               }}>
               <Feather name="arrow-right-circle" size={40} />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
+          </View>
+<View> 
+  <Text>Next</Text>
+          </View>
           </View>
         </ScrollView>
       </View>
@@ -1134,10 +1417,31 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     width: wp('100%'),
   },
+
+  headerContainer1: {
+    flexDirection: 'row',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginRight:20,
+    paddingTop: 50,
+    paddingBottom: 20,
+    width: wp('100%'),
+  },
+  w25: {
+    width: wp('25%'),
+    paddingLeft: 10,
+    paddingRight: 10,
+  },
   w30: {
     width: wp('30%'),
     paddingLeft: 10,
     paddingRight: 10,
+  },
+  w301: {
+    width: wp('30%'),
+    paddingLeft: 1,
+    paddingRight: 20,
   },
   backText: {
     fontSize: hp('2.4%'),
@@ -1198,6 +1502,19 @@ const styles = StyleSheet.create({
     marginTop: 20,
     paddingRight: 30,
     paddingLeft: 30,
+    // paddingLeft: 10,
+    // marginBottom: 20,
+  },
+  btnContainer1: {
+    width: '70%',
+    height: 'auto',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: '20%',
+    paddingRight: 30,
+    marginLeft: 25,
+    paddingLeft: '30%',
     // paddingLeft: 10,
     // marginBottom: 20,
   },
