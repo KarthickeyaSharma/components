@@ -3,7 +3,7 @@ import {
   View,
   Image,
   TouchableOpacity,
-  Text,
+  Text,Keyboard,KeyboardAvoidingView,
   Dimensions,
   FlatList,
   ActivityIndicator,
@@ -43,7 +43,7 @@ import layout1 from '../../assets/layouts/layout1.json';
 import layout2 from '../../assets/layouts/layout2.json';
 import layout3 from '../../assets/layouts/layout3.json';
 import layout4 from '../../assets/layouts/layout4.json';
-import layout5 from '../../assets/layouts/layout5.json';
+import layout5 from '../../assets/layouts/layout5.json'; 
 
 const options = {
   title: 'Pick an Image',
@@ -74,8 +74,16 @@ class LeftPage extends Component {
       languageSelected: 'English',
       layoutSelected: 1,
       font_Family: 'Arial',
+      shouldShow:false,
+      isshowFont:false,
+      isshowColor :false,
+      isshowTextStyle:false,
     };
   }
+
+
+
+
 
   componentDidMount = () => {
     // const inputRef = useRef();
@@ -106,8 +114,29 @@ class LeftPage extends Component {
     BackHandler.addEventListener('hardwareBackPress', this.handleBackButton);
   };
 
+
+
+  
+
+  componentWillMount () {
+    this.keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', this._keyboardDidShow);
+    this.keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', this._keyboardDidHide);
+  }
+
+  _keyboardDidShow =()=> {
+    this.setState({shouldShow:true});
+    // alert('Keyboard Shown');
+  }
+    
+  _keyboardDidHide =()=> {
+    this.setState({shouldShow:false});
+    // alert('Keyboard Hidden');
+  }
+
   componentWillUnmount() {
     BackHandler.removeEventListener('hardwareBackPress', this.handleBackButton);
+    this.keyboardDidShowListener.remove();
+    this.keyboardDidHideListener.remove();
   }
 
   handleBackButton = () => {
@@ -380,6 +409,7 @@ class LeftPage extends Component {
   fontWebText = font_fam => {
     this.setState({
       font_Family: font_fam,
+      visible2: !this.state.visible2,
     });
     var imsgs = `
         (function () {
@@ -448,10 +478,29 @@ class LeftPage extends Component {
     this.setState({
       visible1: !this.state.visible1,
     });
-  toggle2 = () =>
+
+
+  togglefont = () =>
     this.setState({
-      visible2: !this.state.visible2,
+      visible2: !this.state.visible2,  isshowFont:true,
+      isshowColor :false,
+      isshowTextStyle:false,
     });
+    
+    togglecolor = () =>
+    this.setState({
+      visible2: !this.state.visible2,  isshowFont:false,
+      isshowColor :true,
+      isshowTextStyle:false,
+    });
+
+    toggletxtStyle = () =>
+    this.setState({
+      visible2: !this.state.visible2,  isshowFont:false,
+      isshowColor :false,
+      isshowTextStyle:true,
+    });
+
 
   toggle3 = () =>
     this.setState({
@@ -510,17 +559,17 @@ class LeftPage extends Component {
           <View style={styles.w30}>
             <Text style={{color: 'transparent'}}>Preview</Text>
           </View>
-        </View>
+        </View> 
         <ScrollView
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
           style={styles.mainContainer}>
-          <View>
-            <View>
+          
+            {/* <View>
               <Text style={styles.mainText}>Inside Left</Text>
-            </View>
+            </View> */}
 
-            <View style={styles.textContainer}>
+            {/* <View style={styles.textContainer}>
               <View>
                 <TouchableOpacity
                   onPress={() => {
@@ -562,11 +611,11 @@ class LeftPage extends Component {
                 </TouchableOpacity>
                 <Text style={styles.imgText}>Back</Text>
               </View>
-            </View>
+            </View> */}
 
             {/* <View> */}
             <View style={styles.customizeContainer}>
-              <View style={{width: '10%'}}>
+              {/* <View style={{width: '10%'}}>
                 <TouchableOpacity
                   style={[styles.arrow, {justifyContent: 'flex-start'}]}
                   onPress={() => {
@@ -574,8 +623,8 @@ class LeftPage extends Component {
                   }}>
                   <Image source={InsidePageRight} />
                 </TouchableOpacity>
-              </View>
-              <View style={{width: '80%'}}>
+              </View> */}
+              <View style={{width: '100%',height:'100%'}}>
                 {this.state.jsonData !== null ? (
                   <WebView
                     onLoadStart={() => {
@@ -1118,7 +1167,7 @@ class LeftPage extends Component {
                   />
                 ) : null}
               </View>
-              <View style={{width: '10%'}}>
+              {/* <View style={{width: '10%'}}>
                 <TouchableOpacity
                   style={[styles.arrow, {justifyContent: 'flex-end'}]}
                   onPress={() => {
@@ -1126,13 +1175,98 @@ class LeftPage extends Component {
                   }}>
                   <Image source={InsideLeftArrow} />
                 </TouchableOpacity>
-              </View>
+              </View> */}
             </View>
             {/* </View> */}
-          </View>
+          
 
           <View style={{height: hp('5%'), flexDirection: 'row'}}></View>
+        </ScrollView> 
+
+    
+
+ 
+
+
+   
+
+        {this.state.shouldShow ?( 
+       <View>
+          <ScrollView horizontal={true}>
+
+
+<View  
+          style={{
+            height: hp('5%'),
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-evenly',
+          }}> 
+
+
+          <TouchableOpacity style={{ borderBottomColor: "red",borderBottomWidth: 2,width: 100, flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }} > 
+          {/* onPress={this.toggle3} */}
+            {/* <IconM name="dashboard-customize" size={40} color="lightgray" /> */}
+            <Text style={{ color:'red',fontSize: hp('2.4%'), fontFamily: 'baloobhai2-bold',}} >Keyboard</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={{ borderBottomColor: "black",borderBottomWidth: 0,width: 100, flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }} onPress={this.toggle}>
+          <Text style={{ color:'black',fontSize: hp('2.4%'), fontFamily: 'baloobhai2-bold',}}>Layout</Text>
+            {/* <Image
+              source={door}
+              resizeMode={'stretch'}
+              style={{width: wp('9.2%'), height: hp('5.5%')}}
+            /> */}
+          </TouchableOpacity>
+          <TouchableOpacity style={{ borderBottomColor: "black",borderBottomWidth: 0,width: 100, flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }} onPress={this.toggle1}>
+          <Text style={{ color:'black',fontSize: hp('2.4%'), fontFamily: 'baloobhai2-bold',}}>Inspiration</Text>
+            {/* <Image
+              source={bulb1}
+              resizeMode={'stretch'}
+              style={{width: wp('7.3%'), height: hp('5.3%')}}
+            /> */}
+          </TouchableOpacity>
+
+          <TouchableOpacity style={{ borderBottomColor: "black",borderBottomWidth: 0,width: 100, flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }} onPress={this.togglefont}>
+          <Text style={{ color:'black',fontSize: hp('2.4%'), fontFamily: 'baloobhai2-bold',}}>Font</Text>
+ 
+            {/* <Image
+              source={a}
+              resizeMode={'stretch'}
+              style={{width: wp('8.5%'), height: hp('4.6%')}}
+            /> */}
+          </TouchableOpacity> 
+
+
+          <TouchableOpacity style={{ borderBottomColor: "black",borderBottomWidth: 0,width: 100, flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }} onPress={this.togglecolor}>
+          <Text style={{ color:'black',fontSize: hp('2.4%'), fontFamily: 'baloobhai2-bold',}}>Color</Text>
+ 
+            {/* <Image
+              source={a}
+              resizeMode={'stretch'}
+              style={{width: wp('8.5%'), height: hp('4.6%')}}
+            /> */}
+          </TouchableOpacity> 
+
+
+
+          <TouchableOpacity style={{ borderBottomColor: "black",borderBottomWidth: 0,width: 100, flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }} onPress={this.toggletxtStyle}>
+          <Text style={{ color:'black',fontSize: hp('2.4%'), fontFamily: 'baloobhai2-bold',}}>Text Style</Text>
+ 
+            {/* <Image
+              source={a}
+              resizeMode={'stretch'}
+              style={{width: wp('8.5%'), height: hp('4.6%')}}
+            /> */}
+          </TouchableOpacity> 
+          
+        </View> 
+        
         </ScrollView>
+        
+        </View> 
+        ): null}
+        
 
         {/* cropzoomImage bottomsheet */}
         <BottomSheet
@@ -1530,6 +1664,12 @@ class LeftPage extends Component {
             </View>
           </View>
         </BottomSheet>
+
+
+
+
+       
+
         {/*  alphabet bottomsheet */}
         <BottomSheet
           visible={this.state.visible2}
@@ -1541,7 +1681,7 @@ class LeftPage extends Component {
               borderTopRightRadius: 30,
               borderTopLeftRadius: 30,
               padding: 20,
-              height: hp('40%'),
+              height: hp('35%'),
             }}>
             <View
               style={{
@@ -1595,12 +1735,16 @@ class LeftPage extends Component {
               <ScrollView
                 showsVerticalScrollIndicator={false}
                 keyboardShouldPersistTaps="handled">
+
+{this.state.isshowFont ?( 
                 <View
                   style={{
                     width: '100%',
                     borderRadius: 10,
                     backgroundColor: '#fff',
                   }}>
+
+
                   <Text
                     style={{
                       fontSize: 16,
@@ -1611,6 +1755,7 @@ class LeftPage extends Component {
                     }}>
                     Font
                   </Text>
+
                   <View
                     style={{
                       alignItems: 'center',
@@ -1924,8 +2069,10 @@ class LeftPage extends Component {
                       </View>
                     </ScrollView>
                   </View>
-                </View>
-                <View
+                </View>):null}
+
+
+                {this.state.isshowColor ?(  <View
                   style={{
                     width: '100%',
                     borderRadius: 10,
@@ -2030,8 +2177,10 @@ class LeftPage extends Component {
                       )}
                     />
                   </View>
-                </View>
-                <View
+                </View>):null}
+               
+               
+                {this.state.isshowTextStyle ?(   <View
                   style={{
                     width: '100%',
                     borderRadius: 10,
@@ -2140,44 +2289,15 @@ class LeftPage extends Component {
                       </View>
                     </TouchableOpacity>
                   </View>
-                </View>
+                </View>):null}
+              
+              
               </ScrollView>
             </View>
           </View>
         </BottomSheet>
 
-        <View
-          style={{
-            height: hp('13%'),
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-evenly',
-          }}>
-          <TouchableOpacity onPress={this.toggle3}>
-            <IconM name="dashboard-customize" size={40} color="lightgray" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={this.toggle}>
-            <Image
-              source={door}
-              resizeMode={'stretch'}
-              style={{width: wp('9.2%'), height: hp('5.5%')}}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={this.toggle1}>
-            <Image
-              source={bulb1}
-              resizeMode={'stretch'}
-              style={{width: wp('7.3%'), height: hp('5.3%')}}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={this.toggle2}>
-            <Image
-              source={a}
-              resizeMode={'stretch'}
-              style={{width: wp('8.5%'), height: hp('4.6%')}}
-            />
-          </TouchableOpacity>
-        </View>
+       
       </View>
     );
   }
@@ -2241,7 +2361,7 @@ const styles = StyleSheet.create({
   },
   customizeContainer: {
     width: '100%',
-    height: hp('50%'),
+    height: hp('75%'),
     marginTop: hp('4%'),
     flexDirection: 'row',
     display: 'flex',
