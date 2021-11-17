@@ -10,6 +10,7 @@ import {
   BackHandler,
   ScrollView,
   ToastAndroid,
+  Keyboard,
 } from 'react-native';
 const {height, width} = Dimensions.get('window');
 // import RNMinimizeApp from 'react-native-minimize';
@@ -67,8 +68,14 @@ class CustomizationCarousel extends Component {
     global.gcanvas_width = 1080;
     this.state = {
       show1: false,
-      sliders: [<Front />, <Left />, <Right />, <Back />],
+      sliders: [
+        <Front loadingContainer={styles.loadingContainer} />,
+        <Left keyboardHandler={this.keyboardHandler} />,
+        <Right keyboardHandler={this.keyboardHandler} />,
+        <Back />,
+      ],
       activeimageSlide: 0,
+      showKeyboard: false,
     };
     this.closePreviewModal = this.closePreviewModal.bind(this);
   }
@@ -76,11 +83,35 @@ class CustomizationCarousel extends Component {
   componentDidMount() {
     requestCameraPermission();
     BackHandler.addEventListener('hardwareBackPress', this.handleBackButton);
+    // this._keyboadDidshowListener = Keyboard.addListener(
+    //   'keyboardDidShow',
+    //   () => {
+    //     this.setState({
+    //       showKeyboard: true,
+    //     });
+    //   },
+    // );
+    // this._keyboadDidhideListener = Keyboard.addListener(
+    //   'keyboardDidHide',
+    //   () => {
+    //     this.setState({
+    //       showKeyboard: false,
+    //     });
+    //   },
+    // );
   }
 
   componentWillUnmount() {
     BackHandler.removeEventListener('hardwareBackPress', this.handleBackButton);
+    // this._keyboadDidshowListener.remove();
+    // this._keyboadDidhideListener.remove();
   }
+
+  keyboardHandler = boolVal => {
+    this.setState({
+      showKeyboard: boolVal,
+    });
+  };
 
   handleBackButton = () => {
     // this.sendMessageToWebFront();
@@ -203,15 +234,32 @@ class CustomizationCarousel extends Component {
             />
           </View>
         </ScrollView>
-        <View
-          style={{
-            height: hp('10%'),
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-evenly',
-          }}>
-          {this.pagination}
-        </View>
+        {this.state.showKeyboard ? null : (
+          <View
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}>
+            <View style={{width: '25%'}}></View>
+            <View
+              style={{
+                width: '50%',
+                height: hp('10%'),
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-evenly',
+              }}>
+              {this.pagination}
+            </View>
+            <View style={{width: '25%'}}>
+              <TouchableOpacity>
+                <Text style={[styles.backText, {color: '#E280AA'}]}>NEXT</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
       </View>
     );
   }

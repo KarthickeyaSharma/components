@@ -8,6 +8,8 @@ import {
   FlatList,
   ActivityIndicator,
   StyleSheet,
+  Keyboard,
+  BackHandler,
 } from 'react-native';
 import {
   widthPercentageToDP as wp,
@@ -61,6 +63,10 @@ class Left extends Component {
       languageSelected: 'English',
       layoutSelected: 1,
       font_Family: 'Arial',
+      shouldShow: false,
+      isshowFont: false,
+      isshowColor: false,
+      isshowTextStyle: false,
     };
   }
 
@@ -87,6 +93,34 @@ class Left extends Component {
         console.log('leftPage' in JSON.parse(result)[index]);
       }
     });
+    this._keyboadDidshowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        this.setState({
+          shouldShow: true,
+        });
+        this.props.keyboardHandler(true);
+      },
+    );
+    this._keyboadDidhideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        this.setState({
+          shouldShow: false,
+        });
+        this.props.keyboardHandler(false);
+      },
+    );
+  };
+
+  componentWillUnmount() {
+    this._keyboadDidshowListener.remove();
+    this._keyboadDidhideListener.remove();
+  }
+
+  handleBackButton = () => {
+    this.props.navigation.goBack();
+    return true;
   };
 
   InnerLeftLayouts() {
@@ -477,501 +511,501 @@ class Left extends Component {
             startInLoadingState={true}
             source={{
               html: `<html>
-                      <head>
-                          <script src="https://haati.serverguy.cloud/fabric.1.6.0.js"></script> 
-                          <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-                          <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+            <head>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/3.2.0/fabric.min.js"></script>
+                <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
 
-                          <link rel="preconnect" href="https://fonts.googleapis.com">
-                          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-                          <link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Playball&display=swap" rel="stylesheet">
-                          <link href="https://allfont.net/allfont.css?fonts=courier-new" rel="stylesheet" type="text/css" />
-                          <link href="https://allfont.net/allfont.css?fonts=impact" rel="stylesheet" type="text/css" />
-                          <link href="https://allfont.net/allfont.css?fonts=comic-sans-ms" rel="stylesheet" type="text/css" />
-                          <link href="https://allfont.net/allfont.css?fonts=mistral" rel="stylesheet" type="text/css" />
-                          
-                      </head>
-                      <style>
-                          @font-face {font-family: 'Old Standard TT'; src:url('${oldstdttFont}') format('truetype')}
-                          @font-face {font-family: 'Playball'; src:url('${playballFont}') format('truetype')}
-                          @font-face {font-family: 'Courier New'; src:url('${couriernewFont}') format('truetype')}
-                          @font-face {font-family: 'Impact'; src:url('${impactFont}') format('truetype')}
-                          @font-face {font-family: 'Comic Sans MS'; src:url('${comiciFont}') format('truetype')}
-                          @font-face {font-family: 'Trebuchet MS'; src:url('${trebucFont}') format('truetype')}
-                          @font-face {font-family: 'Mistral'; src:url('${mistralFont}') format('truetype')}
-                          @font-face {font-family: 'Corbel Bold'; src:url('${corbelFont}') format('truetype')}
-                          
-                          #canvas2json, #myTextArea, #span, #colorme, #applytext, #applyAlign, #inspireme, #applyfont, #fontme, #applykeyBoard, #alterImg, #myMenu {
-                              display: none;
-                          }
-                          .preloader {
-                            position: fixed;
-                            top: 0;
-                            left: 0;
-                            width: 100%;
-                            height: 100%;
-                            background-color: rgba(255,255,255,0.8);
-                          }
-                      </style>
-                      <body>
-                          
-                          <div class="fabric-canvas-wrapper">
-                            <canvas id='c' width=2160 height=3120></canvas>
-                          </div>
-                          <div class="myMenu" id="myMenu">
-                            <div class="my-context">
-                              <button id="zoomInContext" data-id="zoomin">ZoomIn</button>
-                              <button id="zoomOutContext" data-id="zoomout">ZoomOut</button>
-                              <button id="zoomMvUpContext" data-id="mvup">Move Up</button>
-                              <button id="zoomMvRtContext" data-id="mvrt">Move Righ</button>
-                              <button id="zoomMvDnContext" data-id="mvdn">Move Down</button>
-                              <button id="zoomMvLtContext" data-id="mvlt"> Move Left</button>
-                            </div>
-                          </div>
-                          <button id='alterImg' onclick="openGallery()">Alter Image</button>
-                          <div class="preloader js-preloader flex-center" style="display:none;">
-                            <img src="https://haati.serverguy.cloud/pub/media/theme_options/default/preloader1.gif">
-                          </div>
+                <link rel="preconnect" href="https://fonts.googleapis.com">
+                <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+                <link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Playball&display=swap" rel="stylesheet">
+                <link href="https://allfont.net/allfont.css?fonts=courier-new" rel="stylesheet" type="text/css" />
+                <link href="https://allfont.net/allfont.css?fonts=impact" rel="stylesheet" type="text/css" />
+                <link href="https://allfont.net/allfont.css?fonts=comic-sans-ms" rel="stylesheet" type="text/css" />
+                <link href="https://allfont.net/allfont.css?fonts=mistral" rel="stylesheet" type="text/css" />
+                
+            </head>
+            <style>
+                @font-face {font-family: 'Old Standard TT'; src:url('${oldstdttFont}') format('truetype')}
+                @font-face {font-family: 'Playball'; src:url('${playballFont}') format('truetype')}
+                @font-face {font-family: 'Courier New'; src:url('${couriernewFont}') format('truetype')}
+                @font-face {font-family: 'Impact'; src:url('${impactFont}') format('truetype')}
+                @font-face {font-family: 'Comic Sans MS'; src:url('${comiciFont}') format('truetype')}
+                @font-face {font-family: 'Trebuchet MS'; src:url('${trebucFont}') format('truetype')}
+                @font-face {font-family: 'Mistral'; src:url('${mistralFont}') format('truetype')}
+                @font-face {font-family: 'Corbel Bold'; src:url('${corbelFont}') format('truetype')}
+                
+                #canvas2json, #myTextArea, #span, #colorme, #applytext, #applyAlign, #inspireme, #applyfont, #fontme, #applykeyBoard, #alterImg, #myMenu {
+                    display: none;
+                }
+                .preloader {
+                  position: fixed;
+                  top: 0;
+                  left: 0;
+                  width: 100%;
+                  height: 100%;
+                  background-color: rgba(255,255,255,0.8);
+                }
+            </style>
+            <body>
+                
+                <div class="fabric-canvas-wrapper">
+                  <canvas id='c' width=2160 height=3120></canvas>
+                </div>
+                <div class="myMenu" id="myMenu">
+                  <div class="my-context">
+                    <button id="zoomInContext" data-id="zoomin">ZoomIn</button>
+                    <button id="zoomOutContext" data-id="zoomout">ZoomOut</button>
+                    <button id="zoomMvUpContext" data-id="mvup">Move Up</button>
+                    <button id="zoomMvRtContext" data-id="mvrt">Move Righ</button>
+                    <button id="zoomMvDnContext" data-id="mvdn">Move Down</button>
+                    <button id="zoomMvLtContext" data-id="mvlt"> Move Left</button>
+                  </div>
+                </div>
+                <button id='alterImg' onclick="openGallery()">Alter Image</button>
+                <div class="preloader js-preloader flex-center" style="display:none;">
+                  <img src="https://haati.serverguy.cloud/pub/media/theme_options/default/preloader1.gif">
+                </div>
 
-                          <button id='canvas2json'>2JSON</button>
-                          <textarea id='myTextArea' onfocus="this.select();" onmouseup="return false;"></textarea>
-                          <input type="file" accept="image/*" capture id="span">
-  
-                          <input type="hidden" name="color" id="color" value="#ccc">
-                          <button id="colorme">Color me</button>
+                <button id='canvas2json'>2JSON</button>
+                <textarea id='myTextArea' onfocus="this.select();" onmouseup="return false;"></textarea>
+                <input type="file" accept="image/*" capture id="span">
 
-                          <input type="hidden" name="alignment" id="alignment" value="left">
-                          <button id="applyAlign">Align me</button>
+                <input type="hidden" name="color" id="color" value="#ccc">
+                <button id="colorme">Color me</button>
 
-                          <button type="hidden" name="applytext" id="applytext">Apply</button>
-                          <textarea id="inspireme">Hello</textarea>
+                <input type="hidden" name="alignment" id="alignment" value="left">
+                <button id="applyAlign">Align me</button>
 
-                          <input type="hidden" name="fontme" id="fontme" value="Arial">
-                          <button id="applyfont">Apply Font</button>
+                <button type="hidden" name="applytext" id="applytext">Apply</button>
+                <textarea id="inspireme">Hello</textarea>
 
-                          <input type="hidden" name="keyBoard" id="keyBoard" value="#ccc">
-                          <button id="applykeyBoard">Key Board</button>
+                <input type="hidden" name="fontme" id="fontme" value="Arial">
+                <button id="applyfont">Apply Font</button>
+
+                <input type="hidden" name="keyBoard" id="keyBoard" value="#ccc">
+                <button id="applykeyBoard">Key Board</button>
+        
+                <script>
+        
+                    function openGallery() {
+                        if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                            navigator.mediaDevices.getUserMedia({ video: true });
+                        }
+                        $("#span").click();
+                    }
+        
+                    const MOVE_x= 5;
+                    const MOVE_y= 5;
+                    const ZOOM_factor= 10;
+                
                   
-                          <script>
-                  
-                              function openGallery() {
-                                  if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                                      navigator.mediaDevices.getUserMedia({ video: true });
-                                  }
-                                  $("#span").click();
+                    $(function () {
+
+                        var canvas = new fabric.Canvas('c', {
+                          subTargetCheck: true,
+                          allowTouchScrolling: true,
+                          fireRightClick: true,
+                          stopContextMenu: true
+                        });
+
+                        fabric.util.addListener(document.getElementsByClassName('upper-canvas')[0], 'contextmenu', function(e) {
+                          e.preventDefault();
+                        });
+                        var curX, curY;
+
+                        fabric.util.addListener(document.getElementsByClassName('upper-canvas')[0], 'contextmenu', function(e) {
+                          var cnvsPos = $('#wrapper').offset();
+                          if (canvas.getActiveObject().get('type') === "cropzoomimage") {
+                            var obj = canvas.getActiveObject();
+                            curX = (obj.left + obj.width/3) ;
+                            curY = (obj.top + obj.height/2);
+                            $('#myMenu').css({'top': curY, 'left': curX}).fadeIn('slow');
+                          }        
+                        });
+                        
+                        var originalRender = fabric.IText.prototype._render;
+                            fabric.IText.prototype._render = function(ctx) {
+                            originalRender.call(this, ctx);
+                                
+                            var w = this.width,
+                            h = this.height,
+                            x = -this.width / 2,
+                            y = -this.height / 2;
+                            ctx.beginPath();
+                            ctx.setLineDash([2, 3]);
+                            ctx.moveTo(x, y);
+                            ctx.lineTo(x + w, y);
+                            ctx.lineTo(x + w, y + h);
+                            ctx.lineTo(x, y + h);
+                            ctx.lineTo(x, y);
+                            ctx.closePath();
+                            var stroke = ctx.strokeStyle;
+                            ctx.strokeStyle = "#EF80B1";
+                            ctx.lineWidth = 2;
+                            ctx.stroke();
+                            ctx.strokeStyle = stroke;
+                        
+                            ctx.fillStyle = '#EF80B1';
+                            ctx.font = '13px';
+                            ctx.fillRect(x, y-20, 20, 20);
+                            ctx.lineWidth = 5;
+                            ctx.fillStyle = '#000000';
+                            ctx.font = '13px Bentham';
+                            ctx.fillText("T",x+4,y-3);
+                        }
+
+                        fabric.Cropzoomimage = fabric.util.createClass(fabric.Image,
+                          {
+                            type: 'cropzoomimage',
+                            zoomedXY: false,
+                            initialize: function (element, options) {
+                              options || (options = {});
+                              this.callSuper('initialize', element, options);
+                              this.set({
+                                orgSrc: element.src,
+                                cx: 0,
+                                cy: 0,
+                                cw: element.width,
+                                ch: element.height
+                              });
+                            },
+
+                            zoomBy: function (x, y, z, callback) {
+                              if (x || y) { this.zoomedXY = true; }
+                              this.cx += x;
+                              this.cy += y;
+
+                              if (z) {
+                                this.cw -= z;
+                                this.ch -= z / (this.width / this.height);
                               }
-                  
-                              const MOVE_x= 5;
-                              const MOVE_y= 5;
-                              const ZOOM_factor= 10;
+
+                              if (z && !this.zoomedXY) {
+                                this.cx = this.width / 2 - (this.cw / 2);
+                                this.cy = this.height / 2 - (this.ch / 2);
+                              }
+
+                              if (this.cw > this.width) { this.cw = this.width; }
+                              if (this.ch > this.height) { this.ch = this.height; }
+                              if (this.cw < 1) { this.cw = 1; }
+                              if (this.ch < 1) { this.ch = 1; }
+                              if (this.cx < 0) { this.cx = 0; }
+                              if (this.cy < 0) { this.cy = 0; }
+                              if (this.cx > this.width - this.cw) { this.cx = this.width - this.cw; }
+                              if (this.cy > this.height - this.ch) { this.cy = this.height - this.ch; }
+                              this.rerender(callback);
+                            },
+
+                            rerender: function (callback) {
+                              var img = new Image(), obj = this;
+                              img.crossOrigin = "Anonymous";
+                              img.onload = function () {
+                                var canvas = fabric.util.createCanvasElement();
+                                canvas.width = obj.width;
+                                canvas.height = obj.height;
+                                canvas.getContext('2d').drawImage(this, obj.cx, obj.cy, obj.cw, obj.ch, 0, 0, obj.width, obj.height);
+
+                                img.onload = function () {
+                                  obj.setElement(this);
+                                  obj.set({
+                                    left: obj.left,
+                                    top: obj.top,
+                                    angle: obj.angle
+                                  });
+                                  obj.setCoords();
+                                  if (callback) { callback(obj); }
+                                };
+                                img.src = canvas.toDataURL('image/png');
+                              };
+                              img.src = this.orgSrc;
+
+                            },
+
+                            toObject: function () {
+                              return fabric.util.object.extend(this.callSuper('toObject'), {
+                                orgSrc: this.orgSrc,
+                                cx: this.cx,
+                                cy: this.cy,
+                                cw: this.cw,
+                                ch: this.ch
+                              });
+                            }
+                          });
+
+                        fabric.Cropzoomimage.async = true;
+                        fabric.Cropzoomimage.fromObject = function (object, callback) {
+                          fabric.util.loadImage(object.src, function (img) {
+                            fabric.Image.prototype._initFilters.call(object, object, function (filters) {
+                              object.filters = filters || [];
+                              var instance = new fabric.Cropzoomimage(img, object);
+                              if (callback) { callback(instance); }
+                            });
+                          }, null, object.crossOrigin);
+                        };
+
+                        var originalRender2 = fabric.IText.prototype._initDimensions;
+                        fabric.IText.prototype._initDimensions = function(ctx) {
+                        originalRender2.call(this,ctx);
+                         
+                           if (this.__skipDimension) {
+                                return;
+                            }
                           
+                          console.log("mw"+this.mwidth);
+                          console.log("mh"+this.mheight);
+                              
+                          if(this.txtw!=1) {
+                              this.mwidth=this.width;
+                              this.mheight=this.height;
+                          this.txtw=1;
+                          this.fsize=this.fontSize;
+                          
+                          this.cheight=this._getTextHeight(ctx);
+                        
+                        } 
+                          this.cheight=this._getTextHeight(ctx);
+                          if(this.cheight>(this.mheight - 10) && this.fontSize<=this.fsize){
+                          this.fontSize-=2;
+                           this.height=this.mheight;
+                          } else if(this.cheight<this.mheight && this.fontSize<this.fsize){
+                           
+                           this.height=this.mheight;
+                           
+                          }
+                        }
+                        
+                        fabric.IText.prototype.onKeyDown = (function(onKeyDown) {
+                          return function(e) {
+                          console.log(e.keyCode);
+                          console.log(e.key);
+                            if (e.keyCode == 13 && this.cheight>=(this.mheight-15)) {
+                                this.exitEditing();
+                          } 
+                          
+                          onKeyDown.call(this, e);
+                          }
+                        })(fabric.IText.prototype.onKeyDown)
+
+                        $('.my-context button').click(function(){
+                          var imgObj = canvas.getActiveObject();
+                          if (!imgObj) return;
+
+                          var clickedme =   $(this).attr("id");
+                          var Zm = 0;
+                          var movZx = 0;
+                          var movZy = 0;
+                          switch(clickedme) {
+                            case "zoomInContext":
+                              Zm = ZOOM_factor;
+                              break;
+
+                              case "zoomOutContext":
+                              Zm = -ZOOM_factor;
+                              break;
+
+                              case "zoomMvUpContext":
+                              movZy = -MOVE_y;
+                              break;
+
+                              case "zoomMvDnContext":
+                              movZy = MOVE_y;
+                              break;
+
+                              case "zoomMvRtContext":
+                              movZx = MOVE_x;
+                              break;
+
+                              case "zoomMvLtContext":
+                              movZx = -MOVE_x;
+                              break;
+                          }
+                          imgObj.zoomBy(movZx, movZy, Zm);
+                          canvas.renderAll();
+
+                        }); 
                             
-                              $(function () {
+                        $("#loadJson2Canvas").click(function() {
+                            canvas.loadFromJSON(
+                                $("#myTextArea").val(),
+                                canvas.renderAll.bind(canvas)
+                            );
+                        });
+        
+                        $("#canvas2json").click(function() {
+                            var json = canvas.toJSON();
+                            var svg = canvas.toSVG();
+                            var datas = { "jsonfile": JSON.stringify(json), "svgfile": JSON.stringify(svg) };
+                            window.ReactNativeWebView.postMessage(JSON.stringify(datas));
+                        });
 
-                                  var canvas = new fabric.Canvas('c', {
-                                    subTargetCheck: true,
-                                    allowTouchScrolling: true,
-                                    fireRightClick: true,
-                                    stopContextMenu: true
-                                  });
+                        $("#colorme").click(function() {
+                            canvas.getActiveObject().set("fill",$("#color").val());
+                            canvas.getActiveObject().exitEditing();
+                            canvas.renderAll();
+                        });
 
-                                  fabric.util.addListener(document.getElementsByClassName('upper-canvas')[0], 'contextmenu', function(e) {
-                                    e.preventDefault();
-                                  });
-                                  var curX, curY;
+                        $("#applyAlign").click(function() {
+                            canvas.getActiveObject().set("textAlign",$("#alignment").val());
+                            canvas.getActiveObject().exitEditing();
+                            canvas.renderAll();
+                        });
 
-                                  fabric.util.addListener(document.getElementsByClassName('upper-canvas')[0], 'contextmenu', function(e) {
-                                    var cnvsPos = $('#wrapper').offset();
-                                    if (canvas.getActiveObject().get('type') === "cropzoomimage") {
-                                      var obj = canvas.getActiveObject();
-                                      curX = (obj.left + obj.width/3) ;
-                                      curY = (obj.top + obj.height/2);
-                                      $('#myMenu').css({'top': curY, 'left': curX}).fadeIn('slow');
-                                    }        
-                                  });
-                                  
-                                  var originalRender = fabric.IText.prototype._render;
-                                      fabric.IText.prototype._render = function(ctx) {
-                                      originalRender.call(this, ctx);
-                                          
-                                      var w = this.width,
-                                      h = this.height,
-                                      x = -this.width / 2,
-                                      y = -this.height / 2;
-                                      ctx.beginPath();
-                                      ctx.setLineDash([2, 3]);
-                                      ctx.moveTo(x, y);
-                                      ctx.lineTo(x + w, y);
-                                      ctx.lineTo(x + w, y + h);
-                                      ctx.lineTo(x, y + h);
-                                      ctx.lineTo(x, y);
-                                      ctx.closePath();
-                                      var stroke = ctx.strokeStyle;
-                                      ctx.strokeStyle = "#EF80B1";
-                                      ctx.lineWidth = 2;
-                                      ctx.stroke();
-                                      ctx.strokeStyle = stroke;
-                                  
-                                      ctx.fillStyle = '#EF80B1';
-                                      ctx.font = '13px';
-                                      ctx.fillRect(x, y-20, 20, 20);
-                                      ctx.lineWidth = 5;
-                                      ctx.fillStyle = '#000000';
-                                      ctx.font = '13px Bentham';
-                                      ctx.fillText("T",x+4,y-3);
-                                  }
+                        $("#applytext").click(function() {
+                            canvas.getActiveObject().set("text",$("#inspireme").val().replace(/&#13;/g,String.fromCharCode(10)));
+                            canvas.getActiveObject().exitEditing();
+                            canvas.renderAll();
+                        });
 
-                                  fabric.Cropzoomimage = fabric.util.createClass(fabric.Image,
-                                    {
-                                      type: 'cropzoomimage',
-                                      zoomedXY: false,
-                                      initialize: function (element, options) {
-                                        options || (options = {});
-                                        this.callSuper('initialize', element, options);
-                                        this.set({
-                                          orgSrc: element.src,
-                                          cx: 0,
-                                          cy: 0,
-                                          cw: element.width,
-                                          ch: element.height
-                                        });
-                                      },
+                        $("#applyfont").click(function() {  
+                            canvas.getActiveObject().set("fontFamily",$("#fontme").val());
+                            canvas.getActiveObject().exitEditing();
+                            canvas.renderAll();
+                            fontCallback($("#fontme").val()); 
+                        });
 
-                                      zoomBy: function (x, y, z, callback) {
-                                        if (x || y) { this.zoomedXY = true; }
-                                        this.cx += x;
-                                        this.cy += y;
+                        function fontCallback(f) {
+                          canvas.getActiveObject()["fontFamily"] = f;
+                          canvas.getActiveObject().exitEditing();
+                          canvas.renderAll();
+                        }
+                     
 
-                                        if (z) {
-                                          this.cw -= z;
-                                          this.ch -= z / (this.width / this.height);
-                                        }
+                        $("#applykeyBoard").click(function() { 
+                          if(canvas.getActiveObject()==null)
+                          {
+                            var i=0;
+                            var objs = canvas.getObjects().filter(function(o) {
+                              if (o.get('type') === 'i-text') {
+                                if(i==0)
+                                {
+                                i=1;
+                                canvas.setActiveObject(o);   
+                                o.set("focus","true");
+                                o.enterEditing();
+                                o.hiddenTextarea.focus(); 
+                                canvas.renderAll(); 
+                                }
+                              } 
+                          });
+                          }
+                          else
+                          {
+                            if(canvas.getActiveObject().get('type') === 'i-text')
+                            { 
+                              canvas.getActiveObject().set("focus","true");
+                              canvas.getActiveObject().enterEditing();
+                              canvas.getActiveObject().hiddenTextarea.focus(); 
+                                canvas.renderAll(); 
+                            }
+                          }
+                        });
 
-                                        if (z && !this.zoomedXY) {
-                                          this.cx = this.width / 2 - (this.cw / 2);
-                                          this.cy = this.height / 2 - (this.ch / 2);
-                                        }
+        
+                        var data = JSON.stringify(${this.state.jsonData});
+                        canvas.loadFromJSON(
+                        JSON.parse(data),
+                        canvas.renderAll.bind(canvas));
 
-                                        if (this.cw > this.width) { this.cw = this.width; }
-                                        if (this.ch > this.height) { this.ch = this.height; }
-                                        if (this.cw < 1) { this.cw = 1; }
-                                        if (this.ch < 1) { this.ch = 1; }
-                                        if (this.cx < 0) { this.cx = 0; }
-                                        if (this.cy < 0) { this.cy = 0; }
-                                        if (this.cx > this.width - this.cw) { this.cx = this.width - this.cw; }
-                                        if (this.cy > this.height - this.ch) { this.cy = this.height - this.ch; }
-                                        this.rerender(callback);
-                                      },
+                        const outerCanvasContainer = $('.fabric-canvas-wrapper')[0];
 
-                                      rerender: function (callback) {
-                                        var img = new Image(), obj = this;
-                                        img.crossOrigin = "Anonymous";
-                                        img.onload = function () {
-                                          var canvas = fabric.util.createCanvasElement();
-                                          canvas.width = obj.width;
-                                          canvas.height = obj.height;
-                                          canvas.getContext('2d').drawImage(this, obj.cx, obj.cy, obj.cw, obj.ch, 0, 0, obj.width, obj.height);
+                        const ratio = canvas.getWidth() / canvas.getHeight();
+                        const containerWidth   = outerCanvasContainer.clientWidth;
+                        const containerHeight  = outerCanvasContainer.clientHeight;
 
-                                          img.onload = function () {
-                                            obj.setElement(this);
-                                            obj.set({
-                                              left: obj.left,
-                                              top: obj.top,
-                                              angle: obj.angle
+                        const scale = containerWidth / canvas.getWidth();
+                        const zoom  = canvas.getZoom() * scale;
+                        canvas.setDimensions({width: containerWidth, height: containerWidth / ratio});
+                        canvas.setViewportTransform([zoom, 0, 0, zoom, 0, 0]);    
+                            
+                        canvas.on('mouse:over', function(opts) {
+                            var selectedObj = opts.target;
+                            canvas.setActiveObject(opts.target);
+                            console.log(canvas.getActiveObject().get('type'));
+                            canvas.renderAll();
+                        });
+        
+                        canvas.on('mouse:up', function (opts) {
+                          var selectedObj = opts.target;
+                          canvas.setActiveObject(opts.target);
+                          console.log(canvas.getActiveObject().get('type'));
+                          canvas.renderAll();
+                          if (canvas.getActiveObject().get('type') === "cropzoomimage") {
+                            var obj = canvas.getActiveObject();
+                            if (obj.zoomedxy != 1) {
+                              obj.orgSrc = obj.src;
+                              obj.cw = obj.width;
+                              obj.ch = obj.height;
+                              obj.cx = 0;
+                              obj.cy = 0;
+                            }
+                          }
+                          if (canvas.getActiveObject().get('type') === "i-text") {
+                            var obj = canvas.getActiveObject();
+                            obj.enterEditing();
+                            if (obj.txtw != 1) {
+                              obj.txtw = 0;
+                              obj.dynamicMinWidth = this.width;
+                              obj.mheight = this.height;
+                              maxW = obj.width;
+                              maxH = obj.height;
+                            }
+                  
+                          }
+                  
+                        });
+                        canvas.on('mouse:up', function (opts) {
+                      })
+                        
+                        $('#span').change(function (e) {
+                          var file = e.target.files[0];
+                          console.log(file);
+                          var reader1 = new FileReader();
+                          reader1.onload = function (file) {
+                            console.log("image upload");
+                            var objs = canvas.getActiveObject();
+                            let top = objs.top;
+                            let left = objs.left;
+                  
+                            let wx = objs.width * objs.scaleX;
+                            let wy = objs.height * objs.scaleY;
+                  
+                            console.log(canvas.getActiveObject().get('type'));
+                            if (canvas.getActiveObject().get('type') === "cropzoomimage") {
+                                $('.preloader').css('display','block');
+                                var formData = new FormData();
+                                formData.append('base64', file.target.result);
+                                fetch('https://haati.serverguy.cloud/rest/V1/base64/images', { method: 'POST',body: formData})
+                                    .then(response => response.json())
+                                    .then(JsonResponse => { 
+                                        var imgObject = JSON.parse(JsonResponse);
+                                        console.log(imgObject.image_url);
+                                        objs.isrc = imgObject.image_url;
+                                        objs.src = imgObject.image_url;
+                                        objs.orgSrc = imgObject.image_url;
+                                        objs.setSrc(imgObject.image_url, function(img) {
+                                            var scalex1 = wx / objs.width;
+                                            var scaley1 = wy / objs.height;
+                                            let det = scalex1 * objs.width;
+                                            console.log("4 ->>", objs.width * objs.scaleX, scalex1,  det);
+                                            objs.set({
+                                                scaleY: scaley1,
+                                                scaleX:  scalex1,
                                             });
-                                            obj.setCoords();
-                                            if (callback) { callback(obj); }
-                                          };
-                                          img.src = canvas.toDataURL('image/png');
-                                        };
-                                        img.src = this.orgSrc;
-
-                                      },
-
-                                      toObject: function () {
-                                        return fabric.util.object.extend(this.callSuper('toObject'), {
-                                          orgSrc: this.orgSrc,
-                                          cx: this.cx,
-                                          cy: this.cy,
-                                          cw: this.cw,
-                                          ch: this.ch
+                                            canvas.renderAll();
+                                            $('.preloader').css('display','none');
                                         });
-                                      }
-                                    });
-
-                                  fabric.Cropzoomimage.async = true;
-                                  fabric.Cropzoomimage.fromObject = function (object, callback) {
-                                    fabric.util.loadImage(object.src, function (img) {
-                                      fabric.Image.prototype._initFilters.call(object, object, function (filters) {
-                                        object.filters = filters || [];
-                                        var instance = new fabric.Cropzoomimage(img, object);
-                                        if (callback) { callback(instance); }
-                                      });
-                                    }, null, object.crossOrigin);
-                                  };
-
-                                  var originalRender2 = fabric.IText.prototype._initDimensions;
-                                  fabric.IText.prototype._initDimensions = function(ctx) {
-                                  originalRender2.call(this,ctx);
-                                   
-                                     if (this.__skipDimension) {
-                                          return;
-                                      }
-                                    
-                                    console.log("mw"+this.mwidth);
-                                    console.log("mh"+this.mheight);
-                                        
-                                    if(this.txtw!=1) {
-                                        this.mwidth=this.width;
-                                        this.mheight=this.height;
-                                    this.txtw=1;
-                                    this.fsize=this.fontSize;
-                                    
-                                    this.cheight=this._getTextHeight(ctx);
-                                  
-                                  } 
-                                    this.cheight=this._getTextHeight(ctx);
-                                    if(this.cheight>(this.mheight - 10) && this.fontSize<=this.fsize){
-                                    this.fontSize-=2;
-                                     this.height=this.mheight;
-                                    } else if(this.cheight<this.mheight && this.fontSize<this.fsize){
-                                     
-                                     this.height=this.mheight;
-                                     
-                                    }
-                                  }
-                                  
-                                  fabric.IText.prototype.onKeyDown = (function(onKeyDown) {
-                                    return function(e) {
-                                    console.log(e.keyCode);
-                                    console.log(e.key);
-                                      if (e.keyCode == 13 && this.cheight>=(this.mheight-15)) {
-                                          this.exitEditing();
-                                    } 
-                                    
-                                    onKeyDown.call(this, e);
-                                    }
-                                  })(fabric.IText.prototype.onKeyDown)
-
-                                  $('.my-context button').click(function(){
-                                    var imgObj = canvas.getActiveObject();
-                                    if (!imgObj) return;
-
-                                    var clickedme =   $(this).attr("id");
-                                    var Zm = 0;
-                                    var movZx = 0;
-                                    var movZy = 0;
-                                    switch(clickedme) {
-                                      case "zoomInContext":
-                                        Zm = ZOOM_factor;
-                                        break;
-
-                                        case "zoomOutContext":
-                                        Zm = -ZOOM_factor;
-                                        break;
-
-                                        case "zoomMvUpContext":
-                                        movZy = -MOVE_y;
-                                        break;
-
-                                        case "zoomMvDnContext":
-                                        movZy = MOVE_y;
-                                        break;
-
-                                        case "zoomMvRtContext":
-                                        movZx = MOVE_x;
-                                        break;
-
-                                        case "zoomMvLtContext":
-                                        movZx = -MOVE_x;
-                                        break;
-                                    }
-                                    imgObj.zoomBy(movZx, movZy, Zm);
-                                    canvas.renderAll();
-
-                                  }); 
-                                      
-                                  $("#loadJson2Canvas").click(function() {
-                                      canvas.loadFromJSON(
-                                          $("#myTextArea").val(),
-                                          canvas.renderAll.bind(canvas)
-                                      );
-                                  });
-                  
-                                  $("#canvas2json").click(function() {
-                                      var json = canvas.toJSON();
-                                      var svg = canvas.toSVG();
-                                      var datas = { "jsonfile": JSON.stringify(json), "svgfile": JSON.stringify(svg) };
-                                      window.ReactNativeWebView.postMessage(JSON.stringify(datas));
-                                  });
-
-                                  $("#colorme").click(function() {
-                                      canvas.getActiveObject().set("fill",$("#color").val());
-                                      canvas.getActiveObject().exitEditing();
-                                      canvas.renderAll();
-                                  });
-
-                                  $("#applyAlign").click(function() {
-                                      canvas.getActiveObject().set("textAlign",$("#alignment").val());
-                                      canvas.getActiveObject().exitEditing();
-                                      canvas.renderAll();
-                                  });
-
-                                  $("#applytext").click(function() {
-                                      canvas.getActiveObject().set("text",$("#inspireme").val().replace(/&#13;/g,String.fromCharCode(10)));
-                                      canvas.getActiveObject().exitEditing();
-                                      canvas.renderAll();
-                                  });
-
-                                  $("#applyfont").click(function() {  
-                                      canvas.getActiveObject().set("fontFamily",$("#fontme").val());
-                                      canvas.getActiveObject().exitEditing();
-                                      canvas.renderAll();
-                                      fontCallback($("#fontme").val()); 
-                                  });
-
-                                  function fontCallback(f) {
-                                    canvas.getActiveObject()["fontFamily"] = f;
-                                    canvas.getActiveObject().exitEditing();
-                                    canvas.renderAll();
-                                  }
-                               
-
-                                  $("#applykeyBoard").click(function() { 
-                                    if(canvas.getActiveObject()==null)
-                                    {
-                                      var i=0;
-                                      var objs = canvas.getObjects().filter(function(o) {
-                                        if (o.get('type') === 'i-text') {
-                                          if(i==0)
-                                          {
-                                          i=1;
-                                          canvas.setActiveObject(o);   
-                                          o.set("focus","true");
-                                          o.enterEditing();
-                                          o.hiddenTextarea.focus(); 
-                                          canvas.renderAll(); 
-                                          }
-                                        } 
-                                    });
-                                    }
-                                    else
-                                    {
-                                      if(canvas.getActiveObject().get('type') === 'i-text')
-                                      { 
-                                        canvas.getActiveObject().set("focus","true");
-                                        canvas.getActiveObject().enterEditing();
-                                        canvas.getActiveObject().hiddenTextarea.focus(); 
-                                          canvas.renderAll(); 
-                                      }
-                                    }
-                                  });
-
-                  
-                                  var data = JSON.stringify(${this.state.jsonData});
-                                  canvas.loadFromJSON(
-                                  JSON.parse(data),
-                                  canvas.renderAll.bind(canvas));
-  
-                                  const outerCanvasContainer = $('.fabric-canvas-wrapper')[0];
-      
-                                  const ratio = canvas.getWidth() / canvas.getHeight();
-                                  const containerWidth   = outerCanvasContainer.clientWidth;
-                                  const containerHeight  = outerCanvasContainer.clientHeight;
-  
-                                  const scale = containerWidth / canvas.getWidth();
-                                  const zoom  = canvas.getZoom() * scale;
-                                  canvas.setDimensions({width: containerWidth, height: containerWidth / ratio});
-                                  canvas.setViewportTransform([zoom, 0, 0, zoom, 0, 0]);    
-                                      
-                                  canvas.on('mouse:over', function(opts) {
-                                      var selectedObj = opts.target;
-                                      canvas.setActiveObject(opts.target);
-                                      console.log(canvas.getActiveObject().get('type'));
-                                      canvas.renderAll();
-                                  });
-                  
-                                  canvas.on('mouse:up', function (opts) {
-                                    var selectedObj = opts.target;
-                                    canvas.setActiveObject(opts.target);
-                                    console.log(canvas.getActiveObject().get('type'));
-                                    canvas.renderAll();
-                                    if (canvas.getActiveObject().get('type') === "cropzoomimage") {
-                                      var obj = canvas.getActiveObject();
-                                      if (obj.zoomedxy != 1) {
-                                        obj.orgSrc = obj.src;
-                                        obj.cw = obj.width;
-                                        obj.ch = obj.height;
-                                        obj.cx = 0;
-                                        obj.cy = 0;
-                                      }
-                                    }
-                                    if (canvas.getActiveObject().get('type') === "i-text") {
-                                      var obj = canvas.getActiveObject();
-                                      obj.enterEditing();
-                                      if (obj.txtw != 1) {
-                                        obj.txtw = 0;
-                                        obj.dynamicMinWidth = this.width;
-                                        obj.mheight = this.height;
-                                        maxW = obj.width;
-                                        maxH = obj.height;
-                                      }
-                            
-                                    }
-                            
-                                  });
-                                  canvas.on('mouse:up', function (opts) {
-                                })
-                                  
-                                  $('#span').change(function (e) {
-                                    var file = e.target.files[0];
-                                    console.log(file);
-                                    var reader1 = new FileReader();
-                                    reader1.onload = function (file) {
-                                      console.log("image upload");
-                                      var objs = canvas.getActiveObject();
-                                      let top = objs.top;
-                                      let left = objs.left;
-                            
-                                      let wx = objs.width * objs.scaleX;
-                                      let wy = objs.height * objs.scaleY;
-                            
-                                      console.log(canvas.getActiveObject().get('type'));
-                                      if (canvas.getActiveObject().get('type') === "cropzoomimage") {
-                                          $('.preloader').css('display','block');
-                                          var formData = new FormData();
-                                          formData.append('base64', file.target.result);
-                                          fetch('https://haati.serverguy.cloud/rest/V1/base64/images', { method: 'POST',body: formData})
-                                              .then(response => response.json())
-                                              .then(JsonResponse => { 
-                                                  var imgObject = JSON.parse(JsonResponse);
-                                                  console.log(imgObject.image_url);
-                                                  objs.isrc = imgObject.image_url;
-                                                  objs.src = imgObject.image_url;
-                                                  objs.orgSrc = imgObject.image_url;
-                                                  objs.setSrc(imgObject.image_url, function(img) {
-                                                      var scalex1 = wx / objs.width;
-                                                      var scaley1 = wy / objs.height;
-                                                      let det = scalex1 * objs.width;
-                                                      console.log("4 ->>", objs.width * objs.scaleX, scalex1,  det);
-                                                      objs.set({
-                                                          scaleY: scaley1,
-                                                          scaleX:  scalex1,
-                                                      });
-                                                      canvas.renderAll();
-                                                      $('.preloader').css('display','none');
-                                                  });
-                                          });
-                                      }
-                                    }
-                                    reader1.readAsDataURL(file);
-                                  });
-                                  $(this).val(null);
-                                  return;
-                                });    
-                          </script>
-                      </body>
-                  </html>`,
+                                });
+                            }
+                          }
+                          reader1.readAsDataURL(file);
+                        });
+                        $(this).val(null);
+                        return;
+                      });    
+                </script>
+            </body>
+        </html>`,
               baseUrl: '',
             }}
             ref={webview => {
@@ -1008,6 +1042,1172 @@ class Left extends Component {
             onMessage={this.onMessage}
           />
         ) : null}
+
+        {this.state.shouldShow ? (
+          <View>
+            <ScrollView horizontal={true}>
+              <View
+                style={{
+                  height: hp('5%'),
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-evenly',
+                }}>
+                <TouchableOpacity
+                  style={{
+                    borderBottomColor: 'red',
+                    borderBottomWidth: 2,
+                    width: 100,
+                    flex: 1,
+                    flexDirection: 'row',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}>
+                  <Text
+                    style={{
+                      color: 'red',
+                      fontSize: hp('2.4%'),
+                      fontFamily: 'baloobhai2-bold',
+                    }}>
+                    Keyboard
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={{
+                    borderBottomColor: 'black',
+                    borderBottomWidth: 0,
+                    width: 100,
+                    flex: 1,
+                    flexDirection: 'row',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                  onPress={this.toggle}>
+                  <Text
+                    style={{
+                      color: 'black',
+                      fontSize: hp('2.4%'),
+                      fontFamily: 'baloobhai2-bold',
+                    }}>
+                    Layout
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={{
+                    borderBottomColor: 'black',
+                    borderBottomWidth: 0,
+                    width: 100,
+                    flex: 1,
+                    flexDirection: 'row',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                  onPress={this.toggle1}>
+                  <Text
+                    style={{
+                      color: 'black',
+                      fontSize: hp('2.4%'),
+                      fontFamily: 'baloobhai2-bold',
+                    }}>
+                    Inspiration
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={{
+                    borderBottomColor: 'black',
+                    borderBottomWidth: 0,
+                    width: 100,
+                    flex: 1,
+                    flexDirection: 'row',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                  onPress={this.togglefont}>
+                  <Text
+                    style={{
+                      color: 'black',
+                      fontSize: hp('2.4%'),
+                      fontFamily: 'baloobhai2-bold',
+                    }}>
+                    Font
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={{
+                    borderBottomColor: 'black',
+                    borderBottomWidth: 0,
+                    width: 100,
+                    flex: 1,
+                    flexDirection: 'row',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                  onPress={this.togglecolor}>
+                  <Text
+                    style={{
+                      color: 'black',
+                      fontSize: hp('2.4%'),
+                      fontFamily: 'baloobhai2-bold',
+                    }}>
+                    Color
+                  </Text>
+
+                  {/* <Image
+              source={a}
+              resizeMode={'stretch'}
+              style={{width: wp('8.5%'), height: hp('4.6%')}}
+            /> */}
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={{
+                    borderBottomColor: 'black',
+                    borderBottomWidth: 0,
+                    width: 100,
+                    flex: 1,
+                    flexDirection: 'row',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                  onPress={this.toggletxtStyle}>
+                  <Text
+                    style={{
+                      color: 'black',
+                      fontSize: hp('2.4%'),
+                      fontFamily: 'baloobhai2-bold',
+                    }}>
+                    Text Style
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        ) : null}
+
+        {/* cropzoomImage bottomsheet */}
+        <BottomSheet
+          visible={this.state.visible3}
+          onBackButtonPress={this.toggle3}
+          onBackdropPress={this.toggle3}>
+          <View
+            style={{
+              backgroundColor: '#CFE5FF',
+              borderTopRightRadius: 30,
+              borderTopLeftRadius: 30,
+              padding: 20,
+            }}>
+            <View>
+              <View
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexDirection: 'row',
+                  width: '100%',
+                  padding: 10,
+                  paddingTop: 0,
+                }}>
+                <View
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'flex-start',
+                    alignItems: 'center',
+                    flexDirection: 'row',
+                    width: '50%',
+                  }}>
+                  <View style={{width: '100%'}}>
+                    <Text
+                      style={{
+                        fontSize: 18,
+                        fontFamily: 'baloobhai2-bold',
+                      }}>
+                      Customize
+                    </Text>
+                  </View>
+                </View>
+                <View style={{alignItems: 'center', justifyContent: 'center'}}>
+                  <TouchableOpacity
+                    onPress={() =>
+                      this.setState({
+                        visible3: !this.state.visible3,
+                      })
+                    }>
+                    <Text
+                      style={{
+                        marginLeft: 30,
+                        fontSize: 14,
+                        fontFamily: 'baloobhai2-bold',
+                        textAlign: 'center',
+                      }}>
+                      Done
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              <View style={styles.btnContainer}>
+                <TouchableOpacity
+                  onPress={() => {
+                    this.zoomIn();
+                  }}>
+                  <Feather name="zoom-in" size={40} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    this.zoomOut();
+                  }}>
+                  <Feather name="zoom-out" size={40} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    this.alternatePhoto();
+                  }}>
+                  <IconM
+                    name="add-photo-alternate"
+                    size={40}
+                    // color="#407BFF"
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    this.sendMessageToWebLeft('save');
+                  }}>
+                  <Icons
+                    name="content-save-outline"
+                    size={40}
+                    // color="#407BFF"
+                  />
+                </TouchableOpacity>
+              </View>
+              <View style={[styles.btnContainer, {marginBottom: 20}]}>
+                <TouchableOpacity
+                  onPress={() => {
+                    this.moveUp();
+                  }}>
+                  <Feather name="arrow-up-circle" size={40} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    this.moveDown();
+                  }}>
+                  <Feather name="arrow-down-circle" size={40} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    this.moveLeft();
+                  }}>
+                  <Feather name="arrow-left-circle" size={40} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    this.moveRight();
+                  }}>
+                  <Feather name="arrow-right-circle" size={40} />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </BottomSheet>
+        {/* layout bottomsheet */}
+        <BottomSheet
+          visible={this.state.visible}
+          onBackButtonPress={this.toggle}
+          onBackdropPress={this.toggle}>
+          <View
+            style={{
+              backgroundColor: '#CFE5FF',
+              borderTopRightRadius: 30,
+              borderTopLeftRadius: 30,
+              padding: 20,
+            }}>
+            <View>
+              <View
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexDirection: 'row',
+                  width: '100%',
+                  padding: 10,
+                  paddingTop: 0,
+                }}>
+                <View
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'flex-start',
+                    alignItems: 'center',
+                    flexDirection: 'row',
+                    width: '50%',
+                  }}>
+                  <View style={{width: '50%'}}>
+                    <Text
+                      style={{
+                        fontSize: 18,
+                        fontFamily: 'baloobhai2-bold',
+                      }}>
+                      Layout
+                    </Text>
+                  </View>
+                  <View style={{width: '50%'}}>
+                    <Image
+                      source={poly}
+                      style={{height: 14, width: 16}}></Image>
+                  </View>
+                </View>
+                <View style={{alignItems: 'center', justifyContent: 'center'}}>
+                  <TouchableOpacity
+                    onPress={() =>
+                      this.setState({
+                        visible: !this.state.visible,
+                      })
+                    }>
+                    <Text
+                      style={{
+                        marginLeft: 30,
+                        fontSize: 14,
+                        fontFamily: 'baloobhai2-bold',
+                        textAlign: 'center',
+                      }}>
+                      Done
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-evenly',
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                }}>
+                {this.state.selectLayouts.map((item, index) => {
+                  return (
+                    <TouchableOpacity
+                      onPress={() => {
+                        this.setState({
+                          layoutSelected: index,
+                          visible: !this.state.visible,
+                          jsonData:
+                            index === 0
+                              ? JSON.stringify(layout1)
+                              : index === 1
+                              ? JSON.stringify(layout2)
+                              : index === 2
+                              ? JSON.stringify(layout3)
+                              : index === 3
+                              ? JSON.stringify(layout4)
+                              : JSON.stringify(layout5),
+                        });
+                      }}
+                      style={{
+                        width: wp('25%'),
+                        height: hp('10%'),
+                        backgroundColor: '#FFFFFF',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        marginBottom: 10,
+                        borderColor:
+                          index === this.state.layoutSelected
+                            ? '#E280AA'
+                            : '#FDF2F7',
+                        borderWidth:
+                          index === this.state.layoutSelected ? 2 : 0,
+                      }}>
+                      <Image
+                        resizeMode={'stretch'}
+                        source={{uri: item.image}}
+                        style={{width: '46%', height: '74%', marginTop: 10}}
+                      />
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
+          </View>
+        </BottomSheet>
+        {/* bulb bottomsheet */}
+        <BottomSheet
+          visible={this.state.visible1}
+          onBackButtonPress={this.toggle1}
+          onBackdropPress={this.toggle1}>
+          <View
+            style={{
+              backgroundColor: '#CFE5FF',
+              borderTopRightRadius: 30,
+              borderTopLeftRadius: 30,
+              padding: 20,
+            }}>
+            <View
+              style={{
+                height: hp('40%'),
+              }}>
+              <View
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexDirection: 'row',
+                  width: '100%',
+                  padding: 10,
+                  paddingTop: 0,
+                }}>
+                <View
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'flex-start',
+                    alignItems: 'center',
+                    flexDirection: 'row',
+                    width: '80%',
+                  }}>
+                  <View style={{width: '50%'}}>
+                    <Text
+                      style={{
+                        fontSize: 18,
+                        fontFamily: 'baloobhai2-bold',
+                      }}>
+                      Inspiration
+                    </Text>
+                  </View>
+                  <View style={{width: '50%'}}>
+                    <Image
+                      source={poly}
+                      style={{height: 14, width: 16}}></Image>
+                  </View>
+                </View>
+                <View style={{alignItems: 'center', justifyContent: 'center'}}>
+                  <TouchableOpacity
+                    onPress={() =>
+                      this.setState({
+                        visible1: !this.state.visible1,
+                      })
+                    }>
+                    <Text
+                      style={{
+                        marginLeft: 30,
+                        fontSize: 14,
+                        fontFamily: 'baloobhai2-bold',
+                        textAlign: 'center',
+                      }}>
+                      Done
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              <View style={{width: '100%', flexDirection: 'column'}}>
+                {this.state.searchresult !== null ? (
+                  <FlatList
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    data={this.state.searchresult}
+                    style={{width: '100%'}}
+                    keyExtractor={(item, index) => index.toString()}
+                    renderItem={({item, index}) => (
+                      <TouchableOpacity
+                        onPress={() => this.languageServices(item.language)}
+                        style={{
+                          width: 'auto',
+                          paddingVertical: 8,
+                          marginHorizontal: 10,
+                          paddingHorizontal: 10,
+                          backgroundColor: '#F1F2F2',
+                          borderRadius: 10,
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          borderColor:
+                            item.language === this.state.languageSelected
+                              ? '#E280AA'
+                              : '#FDF2F7',
+                          borderWidth:
+                            item.language === this.state.languageSelected
+                              ? 2
+                              : 0,
+                        }}>
+                        <Text
+                          style={{
+                            color: 'black',
+                            fontSize: 18,
+                            textAlign: 'center',
+                          }}>
+                          {item.language}
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  />
+                ) : null}
+              </View>
+              <View
+                style={{
+                  width: '100%',
+                  flexDirection: 'column',
+                  marginTop: 20,
+                  marginBottom: 60,
+                }}>
+                <FlatList
+                  // horizontal
+                  showsHorizontalScrollIndicator={false}
+                  data={this.state.selectlanguage}
+                  keyExtractor={(item, index) => index.toString()}
+                  renderItem={({item, index}) => (
+                    <TouchableOpacity
+                      onPress={() =>
+                        this.setState({messageSelected: index}, () => {
+                          this.languageMessages(item.message);
+                        })
+                      }
+                      style={{
+                        width: '100%',
+                        backgroundColor: '#F1F2F2',
+                        paddingHorizontal: 10,
+                        marginBottom: 15,
+                        borderColor:
+                          index === this.state.messageSelected
+                            ? '#E280AA'
+                            : '#FDF2F7',
+                        borderWidth:
+                          index === this.state.messageSelected ? 2 : 0,
+                      }}>
+                      <Text
+                        style={{textAlign: 'center', paddingHorizontal: 10}}>
+                        {item.message}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                />
+              </View>
+            </View>
+          </View>
+        </BottomSheet>
+
+        {/*  alphabet bottomsheet */}
+        <BottomSheet
+          visible={this.state.visible2}
+          onBackButtonPress={this.toggle2}
+          onBackdropPress={this.toggle2}>
+          <View
+            style={{
+              backgroundColor: '#CFE5FF',
+              borderTopRightRadius: 30,
+              borderTopLeftRadius: 30,
+              padding: 20,
+              height: hp('35%'),
+            }}>
+            <View
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexDirection: 'row',
+                width: '100%',
+                padding: 10,
+                paddingTop: 0,
+              }}>
+              <View
+                style={{
+                  display: 'flex',
+                  justifyContent: 'flex-start',
+                  alignItems: 'center',
+                  flexDirection: 'row',
+                  width: '80%',
+                }}>
+                <View style={{width: '50%'}}>
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      fontFamily: 'baloobhai2-bold',
+                    }}>
+                    Styling
+                  </Text>
+                </View>
+                <View style={{width: '50%'}}>
+                  <Image source={poly} style={{height: 14, width: 16}}></Image>
+                </View>
+              </View>
+              <View style={{alignItems: 'center', justifyContent: 'center'}}>
+                <TouchableOpacity onPress={this.Done}>
+                  <Text
+                    style={{
+                      marginLeft: 30,
+                      fontSize: 14,
+                      fontFamily: 'baloobhai2-bold',
+                      textAlign: 'center',
+                    }}>
+                    Done
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <View
+              style={{
+                justifyContent: 'space-evenly',
+              }}>
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled">
+                {this.state.isshowFont ? (
+                  <View
+                    style={{
+                      width: '100%',
+                      borderRadius: 10,
+                      backgroundColor: '#fff',
+                    }}>
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontFamily: 'BalooBhai2-SemiBold',
+                        marginTop: 10,
+                        textAlign: 'left',
+                        paddingLeft: 20,
+                      }}>
+                      Font
+                    </Text>
+
+                    <View
+                      style={{
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                      <ScrollView
+                        horizontal={true}
+                        showsHorizontalScrollIndicator={false}
+                        style={{width: '100%'}}>
+                        <View
+                          style={{
+                            width: '100%',
+                            paddingHorizontal: 10,
+                            paddingBottom: 15,
+                            borderRadius: 10,
+                            flexDirection: 'row',
+                            marginRight: 10,
+                          }}>
+                          {/* 1 */}
+                          <View
+                            style={{
+                              borderRadius: 10,
+                              marginTop: 5,
+                              marginRight: 10,
+                            }}>
+                            <TouchableOpacity
+                              onPress={() =>
+                                this.setState({fontSelected: 0}, () => {
+                                  this.fontWebText('Old Standard TT');
+                                })
+                              }>
+                              <View
+                                style={{
+                                  width: 'auto',
+                                  paddingVertical: 8,
+                                  paddingHorizontal: 14,
+                                  borderRadius: 10,
+                                  borderColor:
+                                    this.state.fontSelected === 0
+                                      ? '#E280AA'
+                                      : '#000000',
+                                  borderWidth:
+                                    this.state.fontSelected === 0 ? 2 : 1,
+                                }}>
+                                <Text
+                                  style={{
+                                    fontSize: 16,
+                                    fontFamily: 'OldStandardTT-Regular',
+                                    textAlign: 'center',
+                                  }}>
+                                  ABC
+                                </Text>
+                              </View>
+                            </TouchableOpacity>
+                          </View>
+                          {/* 2 */}
+                          <View
+                            style={{
+                              borderRadius: 10,
+                              marginTop: 5,
+                              marginRight: 10,
+                            }}>
+                            <TouchableOpacity
+                              onPress={() =>
+                                this.setState({fontSelected: 1}, () => {
+                                  this.fontWebText('Playball');
+                                })
+                              }>
+                              <View
+                                style={{
+                                  width: 'auto',
+                                  paddingVertical: 8,
+                                  paddingHorizontal: 14,
+                                  borderRadius: 10,
+                                  borderColor:
+                                    this.state.fontSelected === 1
+                                      ? '#E280AA'
+                                      : '#000000',
+                                  borderWidth:
+                                    this.state.fontSelected === 1 ? 2 : 1,
+                                }}>
+                                <Text
+                                  style={{
+                                    fontSize: 16,
+                                    fontFamily: 'Playball-Regular',
+                                    textAlign: 'center',
+                                  }}>
+                                  ABC
+                                </Text>
+                              </View>
+                            </TouchableOpacity>
+                          </View>
+                          {/* 3 */}
+                          <View
+                            style={{
+                              borderRadius: 10,
+                              marginTop: 5,
+                              marginRight: 10,
+                            }}>
+                            <TouchableOpacity
+                              onPress={() =>
+                                this.setState({fontSelected: 2}, () => {
+                                  this.fontWebText('Courier New');
+                                })
+                              }>
+                              <View
+                                style={{
+                                  width: 'auto',
+                                  paddingVertical: 8,
+                                  paddingHorizontal: 14,
+                                  borderRadius: 10,
+                                  borderColor:
+                                    this.state.fontSelected === 2
+                                      ? '#E280AA'
+                                      : '#000000',
+                                  borderWidth:
+                                    this.state.fontSelected === 2 ? 2 : 1,
+                                }}>
+                                <Text
+                                  style={{
+                                    fontSize: 16,
+                                    fontFamily: 'Courier_New',
+                                    textAlign: 'center',
+                                  }}>
+                                  ABC
+                                </Text>
+                              </View>
+                            </TouchableOpacity>
+                          </View>
+                          {/* 4 */}
+                          <View
+                            style={{
+                              borderRadius: 10,
+                              marginTop: 5,
+                              marginRight: 10,
+                            }}>
+                            <TouchableOpacity
+                              onPress={() =>
+                                this.setState({fontSelected: 3}, () => {
+                                  this.fontWebText('Impact');
+                                })
+                              }>
+                              <View
+                                style={{
+                                  width: 'auto',
+                                  paddingVertical: 8,
+                                  paddingHorizontal: 14,
+                                  borderRadius: 10,
+                                  borderColor:
+                                    this.state.fontSelected === 3
+                                      ? '#E280AA'
+                                      : '#000000',
+                                  borderWidth:
+                                    this.state.fontSelected === 3 ? 2 : 1,
+                                }}>
+                                <Text
+                                  style={{
+                                    fontSize: 16,
+                                    fontFamily: 'impact',
+                                    textAlign: 'center',
+                                  }}>
+                                  ABC
+                                </Text>
+                              </View>
+                            </TouchableOpacity>
+                          </View>
+                          {/* 5 */}
+                          <View
+                            style={{
+                              borderRadius: 10,
+                              marginTop: 5,
+                              marginRight: 10,
+                            }}>
+                            <TouchableOpacity
+                              onPress={() =>
+                                this.setState({fontSelected: 4}, () => {
+                                  this.fontWebText('Comic Sans MS');
+                                })
+                              }>
+                              <View
+                                style={{
+                                  width: 'auto',
+                                  paddingVertical: 8,
+                                  paddingHorizontal: 14,
+                                  borderRadius: 10,
+                                  borderColor:
+                                    this.state.fontSelected === 4
+                                      ? '#E280AA'
+                                      : '#000000',
+                                  borderWidth:
+                                    this.state.fontSelected === 4 ? 2 : 1,
+                                }}>
+                                <Text
+                                  style={{
+                                    fontSize: 16,
+                                    fontFamily: 'comici',
+                                    textAlign: 'center',
+                                  }}>
+                                  ABC
+                                </Text>
+                              </View>
+                            </TouchableOpacity>
+                          </View>
+                          <View
+                            style={{
+                              borderRadius: 10,
+                              marginTop: 5,
+                              marginRight: 10,
+                            }}>
+                            <TouchableOpacity
+                              onPress={() =>
+                                this.setState({fontSelected: 5}, () => {
+                                  this.fontWebText('Trebuchet MS');
+                                })
+                              }>
+                              <View
+                                style={{
+                                  width: 'auto',
+                                  paddingVertical: 8,
+                                  paddingHorizontal: 14,
+                                  borderRadius: 10,
+                                  borderColor:
+                                    this.state.fontSelected === 5
+                                      ? '#E280AA'
+                                      : '#000000',
+                                  borderWidth:
+                                    this.state.fontSelected === 5 ? 2 : 1,
+                                }}>
+                                <Text
+                                  style={{
+                                    fontSize: 16,
+                                    fontFamily: 'trebuc',
+                                    textAlign: 'center',
+                                  }}>
+                                  ABC
+                                </Text>
+                              </View>
+                            </TouchableOpacity>
+                          </View>
+                          <View
+                            style={{
+                              borderRadius: 10,
+                              marginTop: 5,
+                              marginRight: 10,
+                            }}>
+                            <TouchableOpacity
+                              onPress={() =>
+                                this.setState({fontSelected: 6}, () => {
+                                  this.fontWebText('Mistral');
+                                })
+                              }>
+                              <View
+                                style={{
+                                  width: 'auto',
+                                  paddingVertical: 8,
+                                  paddingHorizontal: 14,
+                                  borderRadius: 10,
+                                  borderColor:
+                                    this.state.fontSelected === 6
+                                      ? '#E280AA'
+                                      : '#000000',
+                                  borderWidth:
+                                    this.state.fontSelected === 6 ? 2 : 1,
+                                }}>
+                                <Text
+                                  style={{
+                                    fontSize: 16,
+                                    fontFamily: 'CopyofMistral2',
+                                    textAlign: 'center',
+                                  }}>
+                                  ABC
+                                </Text>
+                              </View>
+                            </TouchableOpacity>
+                          </View>
+                          <View
+                            style={{
+                              borderRadius: 10,
+                              marginTop: 5,
+                            }}>
+                            <TouchableOpacity
+                              onPress={() =>
+                                this.setState({fontSelected: 7}, () => {
+                                  this.fontWebText('Corbel Bold');
+                                })
+                              }>
+                              <View
+                                style={{
+                                  width: 'auto',
+                                  paddingVertical: 8,
+                                  paddingHorizontal: 14,
+                                  borderRadius: 10,
+                                  borderColor:
+                                    this.state.fontSelected === 7
+                                      ? '#E280AA'
+                                      : '#000000',
+                                  borderWidth:
+                                    this.state.fontSelected === 7 ? 2 : 1,
+                                }}>
+                                <Text
+                                  style={{
+                                    fontSize: 16,
+                                    fontFamily: 'Corbel Bold',
+                                    textAlign: 'center',
+                                  }}>
+                                  ABC
+                                </Text>
+                              </View>
+                            </TouchableOpacity>
+                          </View>
+                        </View>
+                      </ScrollView>
+                    </View>
+                  </View>
+                ) : null}
+
+                {this.state.isshowColor ? (
+                  <View
+                    style={{
+                      width: '100%',
+                      borderRadius: 10,
+                      backgroundColor: '#fff',
+                      flexDirection: 'column',
+                      marginVertical: 20,
+                    }}>
+                    <View style={{width: '100%'}}>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          paddingHorizontal: 20,
+                          paddingVertical: 5,
+                        }}>
+                        <View>
+                          <Text
+                            style={{
+                              fontSize: 16,
+                              fontFamily: 'BalooBhai2-Regular',
+                            }}>
+                            OPACITY
+                          </Text>
+                        </View>
+                        <View
+                          style={{
+                            width: 'auto',
+                            paddingVertical: 2,
+                            paddingHorizontal: 8,
+                            backgroundColor: '#E0E0E0',
+                            borderRadius: 10,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                          }}>
+                          <Text
+                            style={{
+                              fontSize: 12,
+                              fontFamily: 'BalooBhai2-Regular',
+                              textAlign: 'center',
+                            }}>
+                            100%
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                    <View
+                      style={{
+                        width: '100%',
+                        flexDirection: 'row',
+                        borderTopColor: '#E280AA',
+                        borderTopWidth: 2,
+                        paddingTop: 5,
+                        paddingBottom: 5,
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}>
+                      <View
+                        style={{
+                          backgroundColor: this.state.viewBGColor,
+                          height: wp('20%'),
+                          width: wp('20%'),
+                          borderRadius: 5,
+                          elevation: 5,
+                          left: 5,
+                        }}></View>
+
+                      <FlatList
+                        numColumns={6}
+                        nestedScrollEnabled={true}
+                        showsVerticalScrollIndicator={false}
+                        data={this.state.selectColors}
+                        style={{
+                          width: wp('80%'),
+                          height: hp('20%'),
+                          paddingLeft: 20,
+                        }}
+                        keyExtractor={(item, index) => index.toString()}
+                        renderItem={({item, index}) => (
+                          <TouchableOpacity
+                            onPress={() => this.colorCodeSelection(item)}
+                            style={{
+                              height: wp('6%'),
+                              width: wp('6%'),
+                              borderRadius: 100,
+                              marginHorizontal: 8,
+                              backgroundColor: `#${item.color_code}`,
+                              paddingHorizontal: 5,
+                              marginVertical: '2%',
+                              elevation: 5,
+                              borderWidth:
+                                this.state.positionID === item.position
+                                  ? 2
+                                  : null,
+                              borderColor:
+                                this.state.positionID === item.position
+                                  ? '#000000'
+                                  : null,
+                            }}></TouchableOpacity>
+                        )}
+                      />
+                    </View>
+                  </View>
+                ) : null}
+
+                {this.state.isshowTextStyle ? (
+                  <View
+                    style={{
+                      width: '100%',
+                      borderRadius: 10,
+                      backgroundColor: '#fff',
+                      flexDirection: 'column',
+                      marginBottom: 40,
+                      padding: 10,
+                    }}>
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontFamily: 'BalooBhai2-SemiBold',
+                      }}>
+                      Text Alignment
+                    </Text>
+                    <View
+                      style={{
+                        width: '100%',
+                        flexDirection: 'row',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}>
+                      <TouchableOpacity
+                        onPress={() =>
+                          this.setState({alignSelected: 'left'}, () => {
+                            this.changealign('left');
+                          })
+                        }>
+                        <View
+                          style={{
+                            padding: 10,
+                            borderRadius: 10,
+                            borderColor:
+                              this.state.alignSelected === 'left'
+                                ? '#E280AA'
+                                : '#000000',
+                            borderWidth:
+                              this.state.alignSelected === 'left' ? 2 : 1,
+                          }}>
+                          <Image
+                            source={left}
+                            style={{
+                              width: 30,
+                              height: 30,
+                              justifyContent: 'center',
+                              alignSelf: 'center',
+                              marginTop: 10,
+                            }}></Image>
+                        </View>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() =>
+                          this.setState({alignSelected: 'center'}, () => {
+                            this.changealign('center');
+                          })
+                        }>
+                        <View
+                          style={{
+                            padding: 10,
+                            borderRadius: 10,
+                            borderColor:
+                              this.state.alignSelected === 'center'
+                                ? '#E280AA'
+                                : '#000000',
+                            borderWidth:
+                              this.state.alignSelected === 'center' ? 2 : 1,
+                          }}>
+                          <Image
+                            source={center}
+                            style={{
+                              width: 37,
+                              height: 37,
+                              justifyContent: 'center',
+                              alignSelf: 'center',
+                              marginTop: 10,
+                            }}></Image>
+                        </View>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() =>
+                          this.setState({alignSelected: 'right'}, () => {
+                            this.changealign('right');
+                          })
+                        }>
+                        <View
+                          style={{
+                            padding: 10,
+                            borderRadius: 10,
+                            borderColor:
+                              this.state.alignSelected === 'right'
+                                ? '#E280AA'
+                                : '#000000',
+                            borderWidth:
+                              this.state.alignSelected === 'right' ? 2 : 1,
+                          }}>
+                          <Image
+                            source={right}
+                            style={{
+                              width: 35,
+                              height: 35,
+                              justifyContent: 'center',
+                              alignSelf: 'center',
+                              marginTop: 10,
+                            }}></Image>
+                        </View>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                ) : null}
+              </ScrollView>
+            </View>
+          </View>
+        </BottomSheet>
       </>
     );
   }

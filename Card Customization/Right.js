@@ -8,6 +8,7 @@ import {
   FlatList,
   StyleSheet,
   ActivityIndicator,
+  Keyboard
 } from 'react-native';
 import {
   widthPercentageToDP as wp,
@@ -60,6 +61,11 @@ class Right extends Component {
       jsonData: null,
       languageSelected: 'English',
       layoutSelected: 1,
+      font_Family: 'Arial',
+      shouldShow: false,
+      isshowFont: false,
+      isshowColor: false,
+      isshowTextStyle: false,
     };
   }
 
@@ -86,6 +92,29 @@ class Right extends Component {
         console.log('rightPage' in JSON.parse(result)[index]);
       }
     });
+    this._keyboadDidshowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        this.setState({
+          shouldShow: true,
+        });
+        this.props.keyboardHandler(true);
+      },
+    );
+    this._keyboadDidhideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        this.setState({
+          shouldShow: false,
+        });
+        this.props.keyboardHandler(false);
+      },
+    );
+  }
+
+  componentWillUnmount() {
+    this._keyboadDidshowListener.remove();
+    this._keyboadDidhideListener.remove();
   }
 
   InnerRightLayouts() {
@@ -455,7 +484,7 @@ class Right extends Component {
             source={{
               html: `<html>
                       <head>
-                          <script src="https://haati.serverguy.cloud/fabric.1.6.0.js"></script> 
+                          <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/3.2.0/fabric.min.js"></script>
                           <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
                           <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
 
