@@ -11,7 +11,6 @@ import {
   StyleSheet,
   BackHandler,
 } from 'react-native';
-import ImagePicker from 'react-native-image-picker';
 const {width, height} = Dimensions.get('window');
 import HaatiText from '../../assets/hatti.png';
 import NetInfo from '@react-native-community/netinfo';
@@ -117,7 +116,7 @@ class CardSelection extends Component {
       Alert.alert('Please select your cards Type.');
     } else {
       global.selectedoptionValue = this.state.selectedoptionValue;
-      this.props.navigation.navigate('FrontPage');
+      this.props.navigation.navigate('FrontPageCarousel');
     }
   }
 
