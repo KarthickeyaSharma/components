@@ -66,15 +66,16 @@ class CustomizationCarousel extends Component {
     global.pdc_layout_ids = null;
     global.gcanvas_height = 1536;
     global.gcanvas_width = 1080;
+    this.child = React.createRef();
     this.state = {
       show1: false,
       sliders: [
         <Front loadingContainer={styles.loadingContainer} />,
         <Left keyboardHandler={this.keyboardHandler} />,
         <Right keyboardHandler={this.keyboardHandler} />,
-        <Back />,
+        <Back ref={this.child} />,
       ],
-      activeimageSlide: 0,
+      activeSlide: 0,
       showKeyboard: false,
     };
     this.closePreviewModal = this.closePreviewModal.bind(this);
@@ -141,9 +142,10 @@ class CustomizationCarousel extends Component {
       <TouchableOpacity
         activeOpacity={1}
         style={{
+          flex: 1,
           // backgroundColor: 'black',
-          height: hp('100%'),
-          width: wp('100%'),
+          // height: hp('100%'),
+          // width: wp('100%'),
           elevation: 5,
           paddingRight: 30,
           paddingLeft: 30,
@@ -158,7 +160,7 @@ class CustomizationCarousel extends Component {
     return (
       <Pagination
         dotsLength={sliders.length}
-        activeDotIndex={this.state.activeimageSlide}
+        activeDotIndex={this.state.activeSlide}
         dotStyle={{
           width: 12,
           height: 12,
@@ -179,6 +181,16 @@ class CustomizationCarousel extends Component {
       />
     );
   }
+
+  changePage = () => {
+    const {activeSlide} = this.state;
+    if (activeSlide < 3) {
+      this.setState({
+        activeSlide: activeSlide + 1,
+      });
+      this._carousel.snapToItem(activeSlide + 1);
+    }
+  };
 
   render() {
     return (
@@ -230,13 +242,42 @@ class CustomizationCarousel extends Component {
               sliderWidth={SLIDER_WIDTH}
               itemWidth={SLIDER_WIDTH}
               inactiveSlideShift={0}
-              onSnapToItem={index => this.setState({activeimageSlide: index})}
+              containerCustomStyle={{flex: 1}}
+              slideStyle={{flex: 1}}
+              onSnapToItem={index => this.setState({activeSlide: index})}
             />
           </View>
         </ScrollView>
-        {this.state.showKeyboard ? null : (
+        {this.state.activeSlide == 3 ? (
           <View
             style={{
+              height: hp('10%'),
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              paddingHorizontal: 30,
+            }}>
+            <TouchableOpacity
+              onPress={() => {
+                global.isPreview
+                  ? this.child.current.getAlert()
+                  : this.setState({show1: true});
+              }}
+              style={styles.addBtn}>
+              <Text
+                style={{
+                  color: 'white',
+                  fontSize: 16,
+                  fontFamily: 'BalooBhai2-SemiBold',
+                }}>
+                Add To Basket
+              </Text>
+            </TouchableOpacity>
+          </View>
+        ) : this.state.showKeyboard ? null : (
+          <View
+            style={{
+              height: hp('10%'),
               display: 'flex',
               flexDirection: 'row',
               justifyContent: 'space-between',
@@ -246,7 +287,6 @@ class CustomizationCarousel extends Component {
             <View
               style={{
                 width: '50%',
-                height: hp('10%'),
                 flexDirection: 'row',
                 alignItems: 'center',
                 justifyContent: 'space-evenly',
@@ -254,7 +294,7 @@ class CustomizationCarousel extends Component {
               {this.pagination}
             </View>
             <View style={{width: '25%'}}>
-              <TouchableOpacity>
+              <TouchableOpacity onPress={() => this.changePage()}>
                 <Text style={[styles.backText, {color: '#E280AA'}]}>NEXT</Text>
               </TouchableOpacity>
             </View>
@@ -322,9 +362,10 @@ const styles = StyleSheet.create({
     fontFamily: 'baloobhai2-bold',
   },
   customizeContainer: {
-    width: '100%',
-    height: hp('65%'),
-    // marginTop: hp('2%'),
+    // width: '100%',
+    // height: hp('65%'),
+    flex: 1,
+    marginVertical: hp('10%'),
     // paddingRight: 30,
     // paddingLeft: 30,
   },
@@ -351,6 +392,14 @@ const styles = StyleSheet.create({
     fontSize: 25,
     fontFamily: 'baloobhai2-bold',
     color: '#407BFF',
+  },
+  addBtn: {
+    width: '100%',
+    padding: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#E73A5E',
+    borderRadius: 50,
   },
 });
 export default CustomizationCarousel;

@@ -33,6 +33,10 @@ class Back extends Component {
     console.log(JSON.stringify(global.pdc_response), 'resp');
   }
 
+  getAlert() {
+    alert('getAlert from Child');
+  }
+
   addToCart = () => {
     var frontId = pdc_layout_ids[0];
     global.frontId = frontId;
@@ -536,79 +540,26 @@ class Back extends Component {
             />
           </View>
         </View>
-
-        <View style={{marginTop: 20}}>
-          <View style={styles.btnContainer}>
-            <TouchableOpacity
-              onPress={() => {
-                CategoryName == 'Invitations'
-                  ? this.props.navigation.navigate('FrontPage')
-                  : this.props.navigation.navigate('RightPage');
-              }}
-              style={[styles.btnContainer, {justifyContent: 'flex-start'}]}>
-              <Icon name="chevron-left" size={50} style={{}}></Icon>
-              <Text
-                style={{
-                  fontSize: 20,
-                  fontFamily: 'BalooBhai2-SemiBold',
-                }}>
-                {' '}
-                Previous
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                global.isPreview
-                  ? this.addToCart()
-                  : this.showMsg(
-                      'Please Customize your card before adding to cart.',
-                    );
-              }}
-              style={styles.addBtn}>
-              <Text
-                style={{
-                  color: 'white',
-                  fontSize: 16,
-                  fontFamily: 'BalooBhai2-SemiBold',
-                }}>
-                Add To Basket
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
       </>
     );
   }
 }
 const styles = StyleSheet.create({
   backContainer: {
-    height: hp('55%'),
+    // height: hp('55%'),
+    flex: 1,
     flexDirection: 'row',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: '4%',
+    // marginTop: '4%',
   },
   imgContainer: {
     width: wp('80%'),
-    height: 'auto',
+    // height: '100%',
     borderColor: 'black',
     borderWidth: 1.5,
-    flexDirection: 'column',
-  },
-  btnContainer: {
-    flexDirection: 'row',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  addBtn: {
-    height: 40,
-    width: 165,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#E73A5E',
-    borderRadius: 50,
+    // flexDirection: 'column',
   },
 });
 export default Back;
