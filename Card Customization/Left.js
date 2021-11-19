@@ -94,14 +94,14 @@ class Left extends Component {
         // }
         // console.log(layout3,'1234');
         
-        this.setState({jsonData: JSON.stringify(layout5)});
+        this.setState({jsonData: JSON.stringify(layout2)});
       } else {
         if ('leftPage' in JSON.parse(result)[index]) {
           this.setState({
             jsonData: JSON.parse(result)[index].leftPage[0].pdc_json,
           });
         } else {
-          this.setState({jsonData: JSON.stringify(layout5)});
+          this.setState({jsonData: JSON.stringify(layout2)});
         }
         console.log('leftPage' in JSON.parse(result)[index]);
       }
