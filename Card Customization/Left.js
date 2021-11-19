@@ -82,26 +82,26 @@ class Left extends Component {
       console.log(JSON.parse(result), 'pdc_datas');
       if (index == -1) {
 
-        var objs =layout2.objects ;
-        for (var pid in objs) {
-          console.log(objs[pid]['type'], 'pids');
-          if (objs[pid]['type'] == 'image') {
-            objs[pid]['type'] = 'cropzoomimage';
-          }
-          if (objs[pid]['type'] == 'i-text') {
-            objs[pid]['type'] = 'Textbox';
-          }
-        }
-        console.log(layout2,'1234');
+        // var objs =layout3.objects ;
+        // for (var pid in objs) {
+        //   console.log(objs[pid]['type'], 'pids');
+        //   if (objs[pid]['type'] == 'image') {
+        //     objs[pid]['type'] = 'cropzoomimage';
+        //   }
+        //   if (objs[pid]['type'] == 'i-text') {
+        //     objs[pid]['type'] = 'Textbox';
+        //   }
+        // }
+        // console.log(layout3,'1234');
         
-        this.setState({jsonData: JSON.stringify(layout2)});
+        this.setState({jsonData: JSON.stringify(layout5)});
       } else {
         if ('leftPage' in JSON.parse(result)[index]) {
           this.setState({
             jsonData: JSON.parse(result)[index].leftPage[0].pdc_json,
           });
         } else {
-          this.setState({jsonData: JSON.stringify(layout2)});
+          this.setState({jsonData: JSON.stringify(layout5)});
         }
         console.log('leftPage' in JSON.parse(result)[index]);
       }
@@ -526,7 +526,7 @@ class Left extends Component {
             source={{
               html: `<html>
               <head>
-                  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/3.2.0/fabric.min.js"></script> 
+                  <script src="https://haati.serverguy.cloud/fabric.3.2.0.js"></script> 
                   <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
                   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
 
@@ -575,7 +575,7 @@ class Left extends Component {
 
                   
                   <div class="wrapper fabric-canvas-wrapper" id="wrapper">
-                    <canvas id='c' width=2160 height=3120></canvas>
+                    <canvas id='c' width=2002 height=2794></canvas>
                     <span><input type="file" name="" id="span"></span>
                       <div class="preloader js-preloader flex-center" style="display:none;">
                         <img src="https://haati.serverguy.cloud/pub/media/theme_options/default/preloader1.gif">
