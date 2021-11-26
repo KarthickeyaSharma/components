@@ -8,7 +8,7 @@ import {
   FlatList,
   StyleSheet,
   ActivityIndicator,
-  Keyboard
+  Keyboard,
 } from 'react-native';
 import {
   widthPercentageToDP as wp,
@@ -43,14 +43,7 @@ class Right extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      avatarSource: null,
-      visible: false,
-      visible1: false,
-      visible2: false,
-      visible3: false,
       selectedColor: '#F44336',
-      pressed: true,
-      textValue: '',
       searchresult: [],
       selectlanguage: [],
       selectmessage: null,
@@ -62,17 +55,18 @@ class Right extends Component {
       languageSelected: 'English',
       layoutSelected: 1,
       font_Family: 'Arial',
-      shouldShow: false,
-      isshowFont: false,
-      isshowColor: false,
-      isshowTextStyle: false,
+      font_Size: 20,
     };
+    this.Text_areaKeyBoard = this.Text_areaKeyBoard.bind(this);
+    this.languageMessages = this.languageMessages.bind(this);
+    this.fontWebText = this.fontWebText.bind(this);
+    this.fontSizeText = this.fontSizeText.bind(this);
+    this.colorWebText = this.colorWebText.bind(this);
+    this.alignWebText = this.alignWebText.bind(this);
+    this.layoutDesign = this.layoutDesign.bind(this);
   }
 
   componentDidMount() {
-    this.inspirationMethod();
-    this.fontColorsMethod();
-    this.InnerRightLayouts();
     AsyncStorage.getItem('pdc_designs', (err, result) => {
       const index =
         result == null || undefined
@@ -92,50 +86,17 @@ class Right extends Component {
         console.log('rightPage' in JSON.parse(result)[index]);
       }
     });
-    this._keyboadDidshowListener = Keyboard.addListener(
-      'keyboardDidShow',
-      () => {
-        this.setState({
-          shouldShow: true,
-        });
-        this.props.keyboardHandler(true);
-      },
+    this._keyboadDidshowListener = Keyboard.addListener('keyboardDidShow', () =>
+      this.props.keyboardHandler(true),
     );
-    this._keyboadDidhideListener = Keyboard.addListener(
-      'keyboardDidHide',
-      () => {
-        this.setState({
-          shouldShow: false,
-        });
-        this.props.keyboardHandler(false);
-      },
+    this._keyboadDidhideListener = Keyboard.addListener('keyboardDidHide', () =>
+      this.props.keyboardHandler(false),
     );
   }
 
   componentWillUnmount() {
     this._keyboadDidshowListener.remove();
     this._keyboadDidhideListener.remove();
-  }
-
-  InnerRightLayouts() {
-    NetInfo.fetch().then(state => {
-      fetch(
-        'https://haati.serverguy.cloud/rest/V1/product/pdp/innerright/post?sku=' +
-          global.skuCName,
-        {
-          method: 'POST',
-        },
-      )
-        .then(response => response.json())
-        .then(JsonResponse => {
-          console.log(JsonResponse);
-          var LayoutsResponse = JSON.parse(JsonResponse);
-          console.log('layoutssss', LayoutsResponse[4].sample_item);
-          this.setState({
-            selectLayouts: LayoutsResponse,
-          });
-        });
-    });
   }
 
   onMessage(data) {
@@ -163,7 +124,7 @@ class Right extends Component {
     });
   }
 
-  sendMessageToWebRight = type => {
+  sendMessageToWebRight = () => {
     console.log(this.myWebview);
     console.log(this);
     this.myWebview.injectJavaScript(`
@@ -171,9 +132,6 @@ class Right extends Component {
                     $("#canvas2json").click();
                 })();
             `);
-
-    if (type == 'left') this.props.navigation.navigate('LeftPage');
-    else if (type == 'back') this.props.navigation.navigate('BackPage');
   };
 
   zoomIn = () => {
@@ -232,6 +190,21 @@ class Right extends Component {
             `);
   };
 
+  layoutDesign = indexPos => {
+    this.setState({
+      jsonData:
+        indexPos === 0
+          ? JSON.stringify(layout1)
+          : indexPos === 1
+          ? JSON.stringify(layout2)
+          : indexPos === 2
+          ? JSON.stringify(layout3)
+          : indexPos === 3
+          ? JSON.stringify(layout4)
+          : JSON.stringify(layout5),
+    });
+  };
+
   fontColorsMethod() {
     console.log('Colors');
     NetInfo.fetch().then(state => {
@@ -253,53 +226,12 @@ class Right extends Component {
     });
   }
 
-  inspirationMethod() {
-    console.log('Ins');
-    NetInfo.fetch().then(state => {
-      fetch('https://haati.serverguy.cloud/rest/V1/all/languages/post?id=1', {
-        method: 'POST',
-      })
-        .then(response => response.json())
-        .then(JsonResponse => {
-          console.log(JsonResponse);
-          var LanguageResponse = JSON.parse(JsonResponse);
-          console.log('languaaaaaaaaaa', LanguageResponse);
-          this.languageServices('English');
-          this.setState({
-            searchresult: LanguageResponse,
-          });
-        });
-    });
-  }
-
-  languageServices(language) {
-    console.log(language);
-    NetInfo.fetch().then(state => {
-      fetch(
-        'https://haati.serverguy.cloud/rest/V1/languages/post?id=' + language,
-        {
-          method: 'POST',
-        },
-      )
-        .then(response => response.json())
-        .then(JsonResponse => {
-          console.log(JsonResponse);
-          var LanguageSelect = JSON.parse(JsonResponse);
-          console.log('Select', LanguageSelect);
-          this.setState({
-            selectlanguage: LanguageSelect,
-            languageSelected: language,
-          });
-        });
-    });
-  }
-
-  languageMessages(message) {
+  languageMessages(message, language) {
     console.log(message);
     this.setState(
       {
         selectmessage: message,
-        visible1: !this.state.visible1,
+        languageSelected: language,
       },
       () => {
         this.sendMessageToText(message);
@@ -323,24 +255,6 @@ class Right extends Component {
     this.myWebview.injectJavaScript(imsgs);
   };
 
-  changealign = type => {
-    if (!this.state.pressed) {
-      this.setState(
-        {pressed: true, textAlign: type, visible2: !this.state.visible2},
-        () => {
-          this.alignWebText(type);
-        },
-      );
-    } else {
-      this.setState(
-        {pressed: false, textAlign: type, visible2: !this.state.visible2},
-        () => {
-          this.alignWebText(type);
-        },
-      );
-    }
-  };
-
   alignWebText = alignment => {
     var imsgs = `
         (function () {
@@ -350,19 +264,6 @@ class Right extends Component {
     `;
     console.log(imsgs);
     this.myWebview.injectJavaScript(imsgs);
-  };
-
-  colorCodeSelection = item => {
-    this.setState(
-      {
-        viewBGColor: `#${item.color_code}`,
-        positionID: item.position,
-        visible2: !this.state.visible2,
-      },
-      () => {
-        this.colorWebText(`#${item.color_code}`);
-      },
-    );
   };
 
   colorWebText = color_code => {
@@ -387,55 +288,28 @@ class Right extends Component {
     this.myWebview.injectJavaScript(imsgs);
   };
 
-  fun_name(value) {
+  fontSizeText = font_size => {
     this.setState({
-      textValue: value,
+      font_Size: font_size,
     });
-  }
+    var imsgs = `
+        (function () {
+            $("#fontSize").val("${font_size}");
+            $("#applyfontSize").click();
+        })();
+    `;
+    console.log(imsgs);
+    this.myWebview.injectJavaScript(imsgs);
+  };
 
-  getInitialState() {
-    return {
-      backgroundColor: '#ededed',
-      color: 'white',
-    };
-  }
-
-  onFocus() {
-    this.setState({
-      backgroundColor: 'green',
-    });
-  }
-
-  onBlur() {
-    this.setState({
-      backgroundColor: '#ededed',
-    });
-  }
-
-  fun_name(value) {
-    this.setState({
-      textValue: value,
-    });
-  }
-
-  toggle = () =>
-    this.setState({
-      visible: !this.state.visible,
-    });
-
-  toggle1 = () =>
-    this.setState({
-      visible1: !this.state.visible1,
-    });
-  toggle2 = () =>
-    this.setState({
-      visible2: !this.state.visible2,
-    });
-
-  toggle3 = () => {
-    this.setState({
-      visible3: !this.state.visible3,
-    });
+  Text_areaKeyBoard = () => {
+    var keyBoard = `
+        (function () { 
+            $("#applykeyBoard").click();
+        })();
+    `;
+    console.log(keyBoard);
+    this.myWebview.injectJavaScript(keyBoard);
   };
 
   render() {
@@ -484,7 +358,7 @@ class Right extends Component {
             source={{
               html: `<html>
                       <head>
-                          <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/3.2.0/fabric.min.js"></script>
+                          <script src="https://haati.serverguy.cloud/fabric.3.2.0.js"></script>
                           <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
                           <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
 
@@ -506,8 +380,9 @@ class Right extends Component {
                           @font-face {font-family: 'Trebuchet MS'; src:url('${trebucFont}') format('truetype')}
                           @font-face {font-family: 'Mistral'; src:url('${mistralFont}') format('truetype')}
                           @font-face {font-family: 'Corbel Bold'; src:url('${corbelFont}') format('truetype')}
-                          
-                          #canvas2json, #myTextArea, #span, #colorme, #applytext, #applyAlign, #inspireme, #applyfont, #fontme, #applykeyBoard, #alterImg, #myMenu {
+                      </style>
+                      <style type="text/css">
+                          #canvas2json, #myTextArea, #span, #colorme, #applytext, #applyAlign, #inspireme, #applyfont, #fontme, #applyfontSize, #fontSize, #applykeyBoard, #alterImg, #myMenu {
                               display: none;
                           }
                           .preloader {
@@ -520,10 +395,18 @@ class Right extends Component {
                           }
                       </style>
                       <body>
+
+                        <script>
+                          var width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
+                          var height = (window.innerHeight > 0) ? window.innerHeight : screen.height;
+                          var canvas = document.getElementById("c");
+                          canvas.width = width;
+                          canvas.height = height;
+                        </script>
                           
-                          <div class="fabric-canvas-wrapper">
-                            <canvas id='c' width=2160 height=3120></canvas>
-                          </div>
+                        <div class="wrapper fabric-canvas-wrapper" id="wrapper">
+                          <canvas id='c' width=2002 height=2794></canvas>
+                        </div>
                           <div class="myMenu" id="myMenu">
                             <div class="my-context">
                               <button id="zoomInContext" data-id="zoomin">ZoomIn</button>
@@ -554,6 +437,9 @@ class Right extends Component {
 
                           <input type="hidden" name="fontme" id="fontme" value="Arial">
                           <button id="applyfont">Apply Font</button>
+
+                          <input type="hidden" name="fontSize" id="fontSize" value="14">
+                          <button id="applyfontSize">Apply Font Size</button>
 
                           <input type="hidden" name="keyBoard" id="keyBoard" value="#ccc">
                           <button id="applykeyBoard">Key Board</button>
@@ -596,173 +482,309 @@ class Right extends Component {
                                     }        
                                   });
                                   
-                                  var originalRender = fabric.IText.prototype._render;
-                                      fabric.IText.prototype._render = function(ctx) {
-                                      originalRender.call(this, ctx);
+                                  var _wrapLine = function(_line, lineIndex, desiredWidth, reservedSpace) {
+                                    var lineWidth = 0,
+                                        splitByGrapheme = this.splitByGrapheme,
+                                        graphemeLines = [],
+                                        line = [],
+                                        words = splitByGrapheme ? fabric.util.string.graphemeSplit(_line) : _line.split(this._wordJoiners),
+                                        word = '',
+                                        offset = 0,
+                                        infix = splitByGrapheme ? '' : ' ',
+                                        wordWidth = 0,
+                                        infixWidth = 0,
+                                        largestWordWidth = 0,
+                                        lineJustStarted = true,
+                                        additionalSpace = splitByGrapheme ? 0 : this._getWidthOfCharSpacing();
+                                        
+                                    reservedSpace = reservedSpace || 0;
+                                    desiredWidth -= reservedSpace;
+                                    for (var i = 0; i < words.length; i++) {
+                                        word = fabric.util.string.graphemeSplit(words[i]);
+                                        wordWidth = this._measureWord(word, lineIndex, offset);
+                                        offset += word.length;
+                                        
+                                        if (this.breakWords && wordWidth >= desiredWidth) {
+                                        
+                                          if (!lineJustStarted) {
+                                              line.push(infix);
+                                                lineJustStarted = true;
+                                            }
                                           
-                                      var w = this.width,
-                                      h = this.height,
-                                      x = -this.width / 2,
-                                      y = -this.height / 2;
-                                      ctx.beginPath();
-                                      ctx.setLineDash([2, 3]);
-                                      ctx.moveTo(x, y);
-                                      ctx.lineTo(x + w, y);
-                                      ctx.lineTo(x + w, y + h);
-                                      ctx.lineTo(x, y + h);
-                                      ctx.lineTo(x, y);
-                                      ctx.closePath();
-                                      var stroke = ctx.strokeStyle;
-                                      ctx.strokeStyle = "#EF80B1";
-                                      ctx.lineWidth = 2;
-                                      ctx.stroke();
-                                      ctx.strokeStyle = stroke;
+                                            for (var w = 0; w < word.length; w++) {
+                                              var letter = word[w];
+                                                var letterWidth = this.getMeasuringContext().measureText(letter).width * this.fontSize / this.CACHE_FONT_SIZE;
+                                                if (lineWidth + letterWidth > desiredWidth) {
+                                                  graphemeLines.push(line);
+                                                    line = [];
+                                                    lineWidth = 0;
+                                                } else {
+                                                  line.push(letter);
+                                                    lineWidth += letterWidth;
+                                                }
+                                            }
+                                            word = [];
+                                        } else {
+                                          lineWidth += infixWidth + wordWidth - additionalSpace;
+                                        }
+                                
+                                        if (lineWidth >= desiredWidth && !lineJustStarted) {
+                                            graphemeLines.push(line);
+                                            line = [];
+                                            lineWidth = wordWidth;
+                                            lineJustStarted = true;
+                                        } else {
+                                            lineWidth += additionalSpace;
+                                        }
+                                
+                                        if (!lineJustStarted) {
+                                            line.push(infix);
+                                        }
+                                        line = line.concat(word);
+                                
+                                        infixWidth = this._measureWord([infix], lineIndex, offset);
+                                        offset++;
+                                        lineJustStarted = false;
+                                        if (wordWidth > largestWordWidth && !this.breakWords) {
+                                            largestWordWidth = wordWidth;
+                                        }
+                                    }
+                                
+                                    i && graphemeLines.push(line);
+                                
+                                    if (largestWordWidth + reservedSpace > this.dynamicMinWidth) {
+                                        this.dynamicMinWidth = largestWordWidth - additionalSpace + reservedSpace;
+                                    }
+                                
+                                    return graphemeLines;
+                                };
+                                
+                                
+                                fabric.util.object.extend(fabric.Textbox.prototype, {
+                                  _wrapLine: _wrapLine,
+                                });
                                   
-                                      ctx.fillStyle = '#EF80B1';
-                                      ctx.font = '13px';
-                                      ctx.fillRect(x, y-20, 20, 20);
-                                      ctx.lineWidth = 5;
-                                      ctx.fillStyle = '#000000';
-                                      ctx.font = '13px Bentham';
-                                      ctx.fillText("T",x+4,y-3);
-                                  }
-
-                                  fabric.Cropzoomimage = fabric.util.createClass(fabric.Image,
-                                    {
-                                      type: 'cropzoomimage',
-                                      zoomedXY: false,
-                                      initialize: function (element, options) {
-                                        options || (options = {});
-                                        this.callSuper('initialize', element, options);
+                                var originalRender = fabric.Textbox.prototype._render;
+                                fabric.Textbox.prototype._render = function(ctx) {
+                                    originalRender.call(this, ctx);
+                                      
+                                    var w = this.width,
+                                    h = this.height,
+                                    x = -this.width / 2,
+                                    y = -this.height / 2;
+                                    ctx.beginPath();
+                                    ctx.moveTo(x, y);
+                                    ctx.lineTo(x + w, y);
+                                    ctx.lineTo(x + w, y + h);
+                                    ctx.lineTo(x, y + h);
+                                    ctx.lineTo(x, y);
+                                    ctx.closePath();
+                                    var stroke = ctx.strokeStyle;
+                                    ctx.strokeStyle = "#EF80B1";
+                                    ctx.lineWidth = 2;
+                                    ctx.stroke();
+                                    ctx.strokeStyle = stroke;
+                                }
+        
+                                canvas.renderAll();
+                                fabric.Cropzoomimage = fabric.util.createClass(fabric.Image,
+                                  {
+                                    type: 'cropzoomimage',
+                                    zoomedXY: false,
+                                    initialize: function (element, options) {
+                                      options || (options = {});
+                                      this.callSuper('initialize', element, options);
+                                      if(this.name!=undefined) {
                                         this.set({
                                           orgSrc: element.src,
+                                          opacity:0.3,
                                           cx: 0,
                                           cy: 0,
+                                          lockMovementY: true,
+                                          lockMovementx: true,
                                           cw: element.width,
                                           ch: element.height
                                         });
-                                      },
-
-                                      zoomBy: function (x, y, z, callback) {
-                                        if (x || y) { this.zoomedXY = true; }
-                                        this.cx += x;
-                                        this.cy += y;
-
-                                        if (z) {
-                                          this.cw -= z;
-                                          this.ch -= z / (this.width / this.height);
-                                        }
-
-                                        if (z && !this.zoomedXY) {
-                                          this.cx = this.width / 2 - (this.cw / 2);
-                                          this.cy = this.height / 2 - (this.ch / 2);
-                                        }
-
-                                        if (this.cw > this.width) { this.cw = this.width; }
-                                        if (this.ch > this.height) { this.ch = this.height; }
-                                        if (this.cw < 1) { this.cw = 1; }
-                                        if (this.ch < 1) { this.ch = 1; }
-                                        if (this.cx < 0) { this.cx = 0; }
-                                        if (this.cy < 0) { this.cy = 0; }
-                                        if (this.cx > this.width - this.cw) { this.cx = this.width - this.cw; }
-                                        if (this.cy > this.height - this.ch) { this.cy = this.height - this.ch; }
-                                        this.rerender(callback);
-                                      },
-
-                                      rerender: function (callback) {
-                                        var img = new Image(), obj = this;
-                                        img.crossOrigin = "Anonymous";
-                                        img.onload = function () {
-                                          var canvas = fabric.util.createCanvasElement();
-                                          canvas.width = obj.width;
-                                          canvas.height = obj.height;
-                                          canvas.getContext('2d').drawImage(this, obj.cx, obj.cy, obj.cw, obj.ch, 0, 0, obj.width, obj.height);
-
-                                          img.onload = function () {
-                                            obj.setElement(this);
-                                            obj.set({
-                                              left: obj.left,
-                                              top: obj.top,
-                                              angle: obj.angle
-                                            });
-                                            obj.setCoords();
-                                            if (callback) { callback(obj); }
-                                          };
-                                          img.src = canvas.toDataURL('image/png');
-                                        };
-                                        img.src = this.orgSrc;
-
-                                      },
-
-                                      toObject: function () {
-                                        return fabric.util.object.extend(this.callSuper('toObject'), {
-                                          orgSrc: this.orgSrc,
-                                          cx: this.cx,
-                                          cy: this.cy,
-                                          cw: this.cw,
-                                          ch: this.ch
-                                        });
                                       }
-                                    });
-
-                                  fabric.Cropzoomimage.async = true;
-                                  fabric.Cropzoomimage.fromObject = function (object, callback) {
-                                    fabric.util.loadImage(object.src, function (img) {
-                                      fabric.Image.prototype._initFilters.call(object, object, function (filters) {
+                                    },
+        
+                                    zoomBy: function (x, y, z, callback) {
+                                      if (x || y) { this.zoomedXY = true; }
+                                      this.cx += x;
+                                      this.cy += y;
+        
+                                      if (z) {
+                                        this.cw -= z;
+                                        this.ch -= z / (this.width / this.height);
+                                      }
+        
+                                      if (z && !this.zoomedXY) {
+                                        this.cx = this.width / 2 - (this.cw / 2);
+                                        this.cy = this.height / 2 - (this.ch / 2);
+                                      }
+        
+                                      if (this.cw > this.width) { this.cw = this.width; }
+                                      if (this.ch > this.height) { this.ch = this.height; }
+                                      if (this.cw < 1) { this.cw = 1; }
+                                      if (this.ch < 1) { this.ch = 1; }
+                                      if (this.cx < 0) { this.cx = 0; }
+                                      if (this.cy < 0) { this.cy = 0; }
+                                      if (this.cx > this.width - this.cw) { this.cx = this.width - this.cw; }
+                                      if (this.cy > this.height - this.ch) { this.cy = this.height - this.ch; }
+                                      this.rerender(callback);
+                                    },
+        
+                                    rerender: function (callback) {
+                                      var img = new Image(), obj = this;
+                                      img.crossOrigin = "Anonymous";
+                                      img.onload = function () {
+                                        var canvas = fabric.util.createCanvasElement();
+                                        canvas.width = obj.width;
+                                        canvas.height = obj.height;
+                                        canvas.getContext('2d').drawImage(this, obj.cx, obj.cy, obj.cw, obj.ch, 0, 0, obj.width, obj.height);
+        
+                                        img.onload = function () {
+                                          obj.setElement(this);
+                                          obj.set({
+                                            left: obj.left,
+                                            top: obj.top,
+                                            angle: obj.angle
+                                          });
+                                          obj.setCoords();
+                                          if (callback) { callback(obj); }
+                                        };
+                                        img.src = canvas.toDataURL('image/png');
+                                      };
+                                      img.src = this.orgSrc;
+        
+                                    },
+        
+                                    toObject: function () {
+                                      return fabric.util.object.extend(this.callSuper('toObject'), {
+                                        orgSrc: this.orgSrc,
+                                        cx: this.cx,
+                                        cy: this.cy,
+                                        cw: this.cw,
+                                        ch: this.ch
+                                      });
+                                    }
+                                  });
+        
+                                  fabric.Image.fromObject = function(object, callback) {
+                                    fabric.util.loadImage(object.src, function(img, error) {
+                                      if (error) {
+                                        callback && callback(null, error);
+                                        return;
+                                      }
+                                      fabric.Image.prototype._initFilters.call(object, object.filters, function(filters) {
                                         object.filters = filters || [];
-                                        var instance = new fabric.Cropzoomimage(img, object);
-                                        if (callback) { callback(instance); }
+                                        fabric.Image.prototype._initFilters.call(object, [object.resizeFilter], function(resizeFilters) {
+                                          object.resizeFilter = resizeFilters[0];
+                                          if (typeof object.version === 'undefined') {
+                                            var elWidth = img.naturalWidth || img.width;
+                                            var elHeight = img.naturalHeight || img.height;
+                                            var scaleX = (object.scaleX || 1) * object.width / elWidth;
+                                            var scaleY = (object.scaleY || 1) * object.height / elHeight;
+                                            object.width = elWidth;
+                                            object.height = elHeight;
+                                            object.scaleX = scaleX;
+                                            object.scaleY = scaleY;
+                                          }
+                                          var image = new fabric.Image(img, object);
+                                          callback(image);
+                                        });
                                       });
                                     }, null, object.crossOrigin);
                                   };
-
-                                  var originalRender2 = fabric.IText.prototype._initDimensions;
-                                  fabric.IText.prototype._initDimensions = function(ctx) {
-                                  originalRender2.call(this,ctx);
-                                   
-                                     if (this.__skipDimension) {
-                                          return;
+        
+        
+                                  fabric.Cropzoomimage.async = true;
+                                  fabric.Cropzoomimage.fromObject = function (object, callback) {
+                                    
+                                    fabric.util.loadImage(object.src, function(img, error) {
+                                      if (error) {
+                                        callback && callback(null, error);
+                                        return;
                                       }
-                                    
-                                    console.log("mw"+this.mwidth);
-                                    console.log("mh"+this.mheight);
-                                        
-                                    if(this.txtw!=1) {
-                                        this.mwidth=this.width;
-                                        this.mheight=this.height;
-                                    this.txtw=1;
-                                    this.fsize=this.fontSize;
-                                    
-                                    this.cheight=this._getTextHeight(ctx);
+                                      fabric.Image.prototype._initFilters.call(object, object.filters, function (filters) {
+                                        object.filters = filters || [];
+                                  fabric.Image.prototype._initFilters.call(object, [object.resizeFilter], function(resizeFilters) {
+                                          object.resizeFilter = resizeFilters[0];
+                                          if (typeof object.version === 'undefined') {
+                                            var elWidth = img.naturalWidth || img.width;
+                                            var elHeight = img.naturalHeight || img.height;
+                                            var scaleX = (object.scaleX || 1) * object.width / elWidth;
+                                            var scaleY = (object.scaleY || 1) * object.height / elHeight;
+                                            object.width = elWidth;
+                                            object.height = elHeight;
+                                            object.scaleX = scaleX;
+                                            object.scaleY = scaleY;
+                                          }
+                                        var instance = new fabric.Cropzoomimage(img, object);
+                                        if (callback) { callback(instance); }
+                                      });
+                                      }); 
+                                    }, null, object.crossOrigin);
+                                  };
+                    
+                                  fabric.Textbox.prototype._clearTextArea =  function(ctx) {
+                                    var width = this.width + this.fontSize * this.scaleX, height = this.height + 4;
+                                    ctx.clearRect(-width / 2, -height / 2, width, height);
+                                  }
+        
+                                  var originalRender2 = fabric.Textbox.prototype.initDimensions;
+                                  fabric.Textbox.prototype.initDimensions = function (ctx) {
+                                    originalRender2.call(this, ctx);
+                                 
+                                   if (this.__skipDimension) {
+                                        return;
+                                    }
                                   
-                                  } 
-                                    this.cheight=this._getTextHeight(ctx);
-                                    if(this.cheight>(this.mheight - 10) && this.fontSize<=this.fsize){
-                                    this.fontSize-=2;
-                                     this.height=this.mheight;
-                                    } else if(this.cheight<this.mheight && this.fontSize<this.fsize){
-                                     
-                                     this.height=this.mheight;
-                                     
+                                    if (this.txtw != 1) {
+                                      this.mwidth = this.width;
+                                      this.mheight = this.height;
+                                      this.txtw = 1;
+                                      this.fsize = this.fontSize;
+                                      this.breakWords=true;
+                                      this.cheight = this.calcTextHeight();
+                                    }
+        
+                                    this.cheight = this.calcTextHeight();
+                                    
+                                    console.log("ch"+this.cheight);
+                                    console.log("mh"+this.mheight);
+                                      
+                                    if (this.cwidth > (this.mwidth) && this.fontSize <= this.fsize) {
+                                      this.fontSize -= 1;
+                                      this.width=this.mwidth;
+                                      this.height = this.mheight;
+                                    } else if (this.cheight > (this.mheight) && this.fontSize <= this.fsize) {
+                                      this.fontSize -= 1;
+                                      this.height = this.mheight;
+                                    } else if (this.cheight < this.mheight && this.fontSize < this.fsize) { 
+                                      this.height = this.mheight;
+                                    } else {
+                                      this.height=this.mheight;
                                     }
                                   }
-                                  
-                                  fabric.IText.prototype.onKeyDown = (function(onKeyDown) {
-                                    return function(e) {
-                                    console.log(e.keyCode);
-                                    console.log(e.key);
-                                      if (e.keyCode == 13 && this.cheight>=(this.mheight-15)) {
-                                          this.exitEditing();
-                                    } 
-                                    
-                                    onKeyDown.call(this, e);
+                                            
+                                  fabric.Textbox.prototype.onKeyDown = (function (onKeyDown) {
+                                    return function (e) { 
+                                      console.log(this.fontSize);
+                                      console.log(this.fsize);
+                                      if (e.keyCode == 13 && this.cheight > (this.mheight)) {
+                                        this.exitEditing();
+                                        alert("Maximum Character reached");
+                                      } else if ((e.keyCode == 8 || e.keyCode == 46) && this.cheight < this.mheight && this.fontSize < this.fsize) {
+                                      this.fontSize += 1;
+                                      this.height = this.mheight;
                                     }
-                                  })(fabric.IText.prototype.onKeyDown)
-
+                                      onKeyDown.call(this, e);
+                                    }
+                                  })(fabric.Textbox.prototype.onKeyDown)
                                   $('.my-context button').click(function(){
                                     var imgObj = canvas.getActiveObject();
                                     if (!imgObj) return;
-
                                     var clickedme =   $(this).attr("id");
                                     var Zm = 0;
                                     var movZx = 0;
@@ -771,30 +793,24 @@ class Right extends Component {
                                       case "zoomInContext":
                                         Zm = ZOOM_factor;
                                         break;
-
                                         case "zoomOutContext":
                                         Zm = -ZOOM_factor;
                                         break;
-
                                         case "zoomMvUpContext":
                                         movZy = -MOVE_y;
                                         break;
-
                                         case "zoomMvDnContext":
                                         movZy = MOVE_y;
                                         break;
-
                                         case "zoomMvRtContext":
                                         movZx = MOVE_x;
                                         break;
-
                                         case "zoomMvLtContext":
                                         movZx = -MOVE_x;
                                         break;
                                     }
                                     imgObj.zoomBy(movZx, movZy, Zm);
                                     canvas.renderAll();
-
                                   });    
                                       
                                   $("#loadJson2Canvas").click(function() {
@@ -836,6 +852,12 @@ class Right extends Component {
                                       fontCallback($("#fontme").val());
                                   });
 
+                                  $("#applyfontSize").click(function() {  
+                                      canvas.getActiveObject().set("fontSize",$("#fontSize").val());
+                                      canvas.getActiveObject().exitEditing();
+                                      canvas.renderAll();
+                                  });
+
                                   function fontCallback(f) {
                                       canvas.getActiveObject()["fontFamily"] = f;
                                       canvas.getActiveObject().exitEditing();
@@ -843,6 +865,7 @@ class Right extends Component {
                                   }
 
                                   $("#applykeyBoard").click(function() { 
+                                    canvas.getActiveObject().exitEditing();
                                     if(canvas.getActiveObject()==null)
                                     {
                                       var i=0;
@@ -862,6 +885,7 @@ class Right extends Component {
                                     }
                                     else
                                     {
+                                      canvas.getActiveObject().enterEditing();
                                       if(canvas.getActiveObject().get('type') === 'i-text')
                                       { 
                                         canvas.getActiveObject().set("focus","true");
@@ -898,6 +922,10 @@ class Right extends Component {
                                   canvas.on('mouse:up', function (opts) {
                                     var selectedObj = opts.target;
                                     canvas.setActiveObject(opts.target);
+                                    opts.target.lockSkewingY = true;
+                                    opts.target.lockSkewingX = true;
+                                    opts.target.lockMovementY = true;
+                                    opts.target.lockMovementX = true;
                                     console.log(canvas.getActiveObject().get('type'));
                                     canvas.renderAll();
                                     if (canvas.getActiveObject().get('type') === "cropzoomimage") {
@@ -909,8 +937,9 @@ class Right extends Component {
                                         obj.cx = 0;
                                         obj.cy = 0;
                                       }
+                                      openGallery();
                                     }
-                                    if (canvas.getActiveObject().get('type') === "i-text") {
+                                    if (canvas.getActiveObject().get('type') === "Textbox") {
                                       var obj = canvas.getActiveObject();
                                       obj.enterEditing();
                                       if (obj.txtw != 1) {
@@ -924,8 +953,18 @@ class Right extends Component {
                                     }
                             
                                   });
-                                  canvas.on('mouse:up', function (opts) {
-                                })
+                                  
+                                  canvas.on('mouse:down', function(opts) {
+                                    var selectedObj = opts.target;
+                                    canvas.setActiveObject(opts.target);
+                                    console.log(canvas.getActiveObject().get('type'));
+                                    if (canvas.getActiveObject().get('type')=='cropzoomimage') {
+                                        openGallery();
+                                    } else if (canvas.getActiveObject().get('type')=='Textbox') {
+                                        opts.target.enterEditing();
+                                    }
+                                    canvas.renderAll();
+                                  });
                                   
                                   $('#span').change(function (e) {
                                     var file = e.target.files[0];
@@ -942,30 +981,24 @@ class Right extends Component {
                             
                                       console.log(canvas.getActiveObject().get('type'));
                                       if (canvas.getActiveObject().get('type') === "cropzoomimage") {
-                                          $('.preloader').css('display','block');
-                                          var formData = new FormData();
-                                          formData.append('base64', file.target.result);
-                                          fetch('https://haati.serverguy.cloud/rest/V1/base64/images', { method: 'POST',body: formData})
-                                              .then(response => response.json())
-                                              .then(JsonResponse => { 
-                                                  var imgObject = JSON.parse(JsonResponse);
-                                                  console.log(imgObject.image_url);
-                                                  objs.isrc = imgObject.image_url;
-                                                  objs.src = imgObject.image_url;
-                                                  objs.orgSrc = imgObject.image_url;
-                                                  objs.setSrc(imgObject.image_url, function(img) {
-                                                      var scalex1 = wx / objs.width;
-                                                      var scaley1 = wy / objs.height;
-                                                      let det = scalex1 * objs.width;
-                                                      console.log("4 ->>", objs.width * objs.scaleX, scalex1,  det);
-                                                      objs.set({
-                                                          scaleY: scaley1,
-                                                          scaleX:  scalex1,
-                                                      });
-                                                      canvas.renderAll();
-                                                      $('.preloader').css('display','none');
-                                                  });
+                                          console.log(file.target.result);
+                                          objs.opacity=1;
+                                          objs.isrc = file.target.result;
+                                          objs.src = file.target.result;
+                                          objs.orgSrc = file.target.result;
+                                          objs.setSrc(file.target.result, function(img) {
+                                              console.log(img,"helloImg");
+                                              var scalex1 = wx / img.width;
+                                              var scaley1 = wy / img.height;
+                                              let det = scalex1 * img.width;
+                                              console.log("4 ->>", img.width * img.scaleX, scalex1,  det);
+                                              objs.set({
+                                                  scaleY: scaley1,
+                                                  scaleX:  scalex1,
+                                              });
+                                              canvas.renderAll();
                                           });
+                                          setTimeout(function(){ $("#canvas2json").click(); }, 2000);
                                       }
                                     }
                                     reader1.readAsDataURL(file);

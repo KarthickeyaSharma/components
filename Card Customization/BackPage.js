@@ -6,11 +6,11 @@ import {
   TouchableOpacity,
   Text,
   Dimensions,
-  Modal,
-  ScrollView,
   Alert,
   StyleSheet,
+  ScrollView,
 } from 'react-native';
+import HaatiText from '../../assets/hatti.png';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
@@ -18,11 +18,9 @@ import {
 const {height, width} = Dimensions.get('window');
 import NetInfo from '@react-native-community/netinfo';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import HaatiText from '../../assets/hatti.png';
-import book from '../../assets/book1.png';
-import openbook from '../../assets/Inside_Group.png';
-import closebook from '../../assets/Back_Frame.png';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import CheckPreviewModal from '../Modals/CheckPreviewModal';
 
 class BackPage extends Component {
   constructor(props) {
@@ -30,7 +28,7 @@ class BackPage extends Component {
     this.state = {
       backImageResult: null,
       imageurl: null,
-      show1: false,
+      showPreview: false,
     };
   }
 
@@ -58,29 +56,27 @@ class BackPage extends Component {
       global.pdc_response[frontId].json = JSON.parse(
         d[0].frontPage[0].pdc_json,
       );
-      
 
       // Converting cropzoomimage to image
       var objs = global.pdc_response[frontId].json['objects'];
-      console.log(objs,"bobjs");
+      console.log(objs, 'bobjs');
       for (var pid in objs) {
         console.log(objs[pid]['type'], 'pids');
         if (objs[pid]['type'] == 'cropzoomimage') {
           objs[pid]['type'] = 'image';
         }
       }
-      console.log(objs,"aobjs");
-      console.log("pdcObjs",global.pdc_response[frontId].json);
-
+      console.log(objs, 'aobjs');
+      console.log('pdcObjs', global.pdc_response[frontId].json);
 
       // if category is invitation then don't do any operation on left and right page
       if (CategoryName == 'Invitations') {
       } else {
         var jsonPages = JSON.stringify(d[0]);
         jsonPages = JSON.parse(jsonPages);
-        
+
         // Checking if leftPage is customized or not
-        if("leftPage" in jsonPages) {
+        if ('leftPage' in jsonPages) {
           // checking if response got from backend contains leftPage or not
           // If contains then overwrite else create leftpage node
           if (global.pdc_response[leftId].json == undefined) {
@@ -94,20 +90,19 @@ class BackPage extends Component {
           }
           // Converting cropzoomimage to image in Left Page
           var objs = global.pdc_response[leftId].json['objects'];
-          console.log(objs,"bobjs");
+          console.log(objs, 'bobjs');
           for (var pid in objs) {
             console.log(objs[pid]['type'], 'pids');
             if (objs[pid]['type'] == 'cropzoomimage') {
               objs[pid]['type'] = 'image';
             }
           }
-          console.log(objs,"aobjs");
-          console.log("pdcObjs",global.pdc_response[leftId].json);
+          console.log(objs, 'aobjs');
+          console.log('pdcObjs', global.pdc_response[leftId].json);
         }
-        
 
         // Checking if rightPage is customized or not
-        if("rightPage" in jsonPages) {
+        if ('rightPage' in jsonPages) {
           // checking if response got from backend contains rightPage or not
           // If contains then overwrite else create rightPage node
           if (global.pdc_response[rightId].json == undefined) {
@@ -121,15 +116,15 @@ class BackPage extends Component {
           }
           // Converting cropzoomimage to image in Right Page
           var objs = global.pdc_response[rightId].json['objects'];
-          console.log(objs,"bobjs");
+          console.log(objs, 'bobjs');
           for (var pid in objs) {
             console.log(objs[pid]['type'], 'pids');
             if (objs[pid]['type'] == 'cropzoomimage') {
               objs[pid]['type'] = 'image';
             }
           }
-          console.log(objs,"aobjs");
-          console.log("pdcObjs",global.pdc_response[rightId].json);
+          console.log(objs, 'aobjs');
+          console.log('pdcObjs', global.pdc_response[rightId].json);
         }
       }
 
@@ -144,7 +139,7 @@ class BackPage extends Component {
         svgPages = JSON.parse(svgPages);
 
         // Checking if leftPage is customized or not
-        if("leftPage" in jsonPages) {
+        if ('leftPage' in jsonPages) {
           // checking if response got from backend contains leftPage or not
           // If contains then overwrite else create leftpage node
           if (global.pdc_response[leftId].sideSvg == undefined) {
@@ -159,7 +154,7 @@ class BackPage extends Component {
         }
 
         // Checking if rightPage is customized or not
-        if("rightPage" in svgPages) {
+        if ('rightPage' in svgPages) {
           // checking if response got from backend contains rightPage or not
           // If contains then overwrite else create rightPage node
           if (global.pdc_response[rightId].sideSvg == undefined) {
@@ -534,6 +529,22 @@ class BackPage extends Component {
     ]);
   };
 
+  checkPreview = () => {
+    global.isPreview
+      ? this.props.navigation.navigate('CardPreview', {
+          cheight: global.gcanvas_height,
+          cwidth: global.gcanvas_width,
+          skuCName: global.skuCName,
+        })
+      : this.setState({showPreview: true});
+  };
+
+  closePreviewModal() {
+    this.setState({
+      showPreview: false,
+    });
+  }
+
   render() {
     return (
       <View style={styles.container}>
@@ -552,186 +563,61 @@ class BackPage extends Component {
             <Image source={HaatiText} style={styles.title}></Image>
           </View>
           <View style={styles.w30}>
-            <TouchableOpacity
-              onPress={() =>
-                global.isPreview
-                  ? this.props.navigation.navigate('CardPreview', {
-                      cheight: global.gcanvas_width,
-                      cwidth: global.gcanvas_width,
-                      skuCName: global.skuCName,
-                    })
-                  : this.setState({show1: true})
-              }>
+            <TouchableOpacity onPress={() => this.checkPreview()}>
               <Text style={[styles.backText, {color: '#E280AA'}]}>Preview</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        <Modal transparent={true} visible={this.state.show1}>
-          <View
-            style={{
-              flex: 1,
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-            <View
-              style={{
-                width: wp('80%'),
-                height: hp('19%'),
-                borderRadius: 20,
-                borderColor: '#D47EAC',
-                borderWidth: 0.5,
-                backgroundColor: 'white',
-              }}>
-              <View
-                style={{
-                  flex: 0.7,
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  borderBottomWidth: 0.5,
-                  alignItems: 'center',
-                  borderBottomColor: '#D47EAC',
-                }}>
-                <Text style={{fontSize: 16, fontFamily: 'baloobhai2-bold'}}>
-                  Uh-Oh
-                </Text>
-                <Text style={{fontSize: 12, fontFamily: 'BalooBhai2-Regular'}}>
-                  Not all the pictures on this card
-                </Text>
-                <Text style={{fontSize: 12, fontFamily: 'BalooBhai2-Regular'}}>
-                  have been customised
-                </Text>
-              </View>
-              <View
-                style={{
-                  flex: 0.3,
-                  flexDirection: 'row',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                <TouchableOpacity
-                  onPress={() => {
-                    this.setState({show1: false});
-                  }}>
-                  <Text
-                    style={{
-                      fontSize: 20,
-                      fontFamily: 'BalooBhai2-Regular',
-                      color: '#407BFF',
-                    }}>
-                    OK
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
+        {/* Check Preview Modal */}
+        <CheckPreviewModal
+          visibility={this.state.showPreview}
+          closePreviewModal={this.closePreviewModal}
+        />
 
+        {/* backgroundcolor */}
         <ScrollView
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
-          style={styles.mainContainer}>
-          <View>
-            <Text style={styles.mainText}>Front Cover</Text>
-          </View>
-
-          <View style={styles.textContainer}>
-            <View>
-              <TouchableOpacity
-                onPress={() => {
-                  this.props.navigation.navigate('FrontPage');
-                }}>
+          style={styles.mainContainer}
+          contentContainerStyle={styles.innerContainer}>
+          <View style={styles.customizeContainer}>
+            <View style={styles.backContainer}>
+              <View style={styles.imgContainer}>
                 <Image
-                  source={book}
                   resizeMode={'stretch'}
-                  style={styles.imgShow}
+                  source={{uri: this.state.imageurl}}
+                  style={{flex: 1}}
                 />
-              </TouchableOpacity>
-              <Text style={styles.imgText}>Front</Text>
-            </View>
-
-            {CategoryName == 'Invitations' ? null : (
-              <View style={{}}>
-                <TouchableOpacity
-                  onPress={() => {
-                    this.props.navigation.navigate('LeftPage');
-                  }}>
-                  <Image
-                    source={openbook}
-                    resizeMode={'stretch'}
-                    style={{width: wp('15%'), height: hp('5.5%')}}
-                  />
-                </TouchableOpacity>
-                <Text style={[styles.imgText, {textAlign: 'center'}]}>
-                  Inside
-                </Text>
               </View>
-            )}
-            <View style={{}}>
-              <TouchableOpacity
-                onPress={() => {
-                  // this.props.navigation.navigate('BackPage');
-                }}>
-                <Image
-                  source={closebook}
-                  resizeMode={'stretch'}
-                  style={styles.imgShow}
-                />
-              </TouchableOpacity>
-              <Text style={styles.imgText}>Back</Text>
-            </View>
-          </View>
-
-          <View style={styles.backContainer}>
-            <View style={styles.imgContainer}>
-              <Image
-                resizeMode={'stretch'}
-                source={{uri: this.state.imageurl}}
-                style={{flex: 1}}
-              />
-            </View>
-          </View>
-
-          <View style={{marginTop: 20}}>
-            <View style={styles.btnContainer}>
-              <TouchableOpacity
-                onPress={() => {
-                  CategoryName == 'Invitations'
-                    ? this.props.navigation.navigate('FrontPage')
-                    : this.props.navigation.navigate('RightPage');
-                }}
-                style={[styles.btnContainer, {justifyContent: 'flex-start'}]}>
-                <Icon name="chevron-left" size={50} style={{}}></Icon>
-                <Text
-                  style={{
-                    fontSize: 20,
-                    fontFamily: 'BalooBhai2-SemiBold',
-                  }}>
-                  {' '}
-                  Previous
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => {
-                  global.isPreview
-                    ? this.addToCart()
-                    : this.showMsg(
-                        'Please Customize your card before adding to cart.',
-                      );
-                }}
-                style={styles.addBtn}>
-                <Text
-                  style={{
-                    color: 'white',
-                    fontSize: 16,
-                    fontFamily: 'BalooBhai2-SemiBold',
-                  }}>
-                  Add To Basket
-                </Text>
-              </TouchableOpacity>
             </View>
           </View>
         </ScrollView>
+        <View
+          style={{
+            height: hp('10%'),
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingHorizontal: 30,
+          }}>
+          <TouchableOpacity
+            onPress={() => {
+              global.isPreview
+                ? alert('Work is still in progress')
+                : this.setState({showPreview: true});
+            }}
+            style={styles.addBtn}>
+            <Text
+              style={{
+                color: 'white',
+                fontSize: 16,
+                fontFamily: 'BalooBhai2-SemiBold',
+              }}>
+              Add To Basket
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
@@ -765,32 +651,25 @@ const styles = StyleSheet.create({
     width: 100,
     height: 40,
   },
-  backContainer: {
-    height: hp('55%'),
-    flexDirection: 'row',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: '4%',
-  },
   mainContainer: {
     backgroundColor: '#FDF2F7',
     borderTopRightRadius: 44,
     width: wp('100%'),
-    height: '100%', //height / 100 * 100
-    padding: 20,
+    height: hp('100%'), //height / 100 * 100
+    // padding: 20,
+    // justifyContent: 'center'
   },
   mainText: {
     fontSize: hp('3.1%'),
     fontFamily: 'BalooBhai2-SemiBold',
     textAlign: 'center',
   },
-  textContainer: {
-    flexDirection: 'row',
+  innerContainer: {
+    flex: 1,
     display: 'flex',
-    justifyContent: 'space-evenly',
+    flexDirection: 'column',
+    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 10,
   },
   imgShow: {
     width: wp('7%'),
@@ -800,22 +679,58 @@ const styles = StyleSheet.create({
     fontSize: hp('2.1%'),
     fontFamily: 'baloobhai2-bold',
   },
-  imgContainer: {
-    width: wp('80%'),
+  customizeContainer: {
+    width: '100%',
     height: 'auto',
-    borderColor: 'black',
-    borderWidth: 1.5,
-    flexDirection: 'column',
+    flex: 1,
+    marginVertical: hp('2%'),
+    padding: 30,
+    // paddingRight: 30,
+    // paddingLeft: 30,
+  },
+  loadingContainer: {
+    height: '100%',
+    width: '100%',
+    position: 'absolute',
+    justifyContent: 'center',
+    alignSelf: 'center',
   },
   btnContainer: {
+    width: '100%',
+    height: 'auto',
     flexDirection: 'row',
-    display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginTop: 20,
+    paddingRight: 30,
+    paddingLeft: 30,
+    // paddingLeft: 10,
+    // marginBottom: 20,
+  },
+  saveText: {
+    fontSize: 25,
+    fontFamily: 'baloobhai2-bold',
+    color: '#407BFF',
+  },
+  backContainer: {
+    // height: hp('55%'),
+    flex: 1,
+    flexDirection: 'row',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    // marginTop: '4%',
+  },
+  imgContainer: {
+    width: wp('80%'),
+    // height: '100%',
+    borderColor: 'black',
+    borderWidth: 1.5,
+    // flexDirection: 'column',
   },
   addBtn: {
-    height: 40,
-    width: 165,
+    width: '100%',
+    padding: 10,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#E73A5E',

@@ -814,7 +814,7 @@ this.width=this.mwidth;
                         obj.cy = 0;
                       }
                     }
-                    if (canvas.getActiveObject().get('type') === "textbox") {
+                    if (canvas.getActiveObject().get('type') === "Textbox") {
                       var obj = canvas.getActiveObject();
                       obj.enterEditing();
                       if (obj.txtw != 1) {
@@ -842,7 +842,7 @@ this.width=this.mwidth;
                   console.log(canvas.getActiveObject().get('type'));
                   if (canvas.getActiveObject().get('type')=='cropzoomimage') {
                       openGallery();
-                  } else if (canvas.getActiveObject().get('type')=='i-text') {
+                  } else if (canvas.getActiveObject().get('type')=='Textbox') {
                       opts.target.enterEditing();
                   }
                   canvas.renderAll();

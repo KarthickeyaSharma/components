@@ -194,14 +194,14 @@ class HomeMain extends Component {
           </View>
         </View>
         <View style={styles.mainContainer}>
-          <View style={styles.searchContainer}>
+          {/* <View style={styles.searchContainer}>
             <Image source={Search} style={styles.searchImg} />
             <TextInput
               style={styles.searchInput}
               placeholder="Search"
               value={this.state.searchtext}
               onChangeText={text => this.changeText(text)}></TextInput>
-          </View>
+          </View> */}
 
           <FlatList
             showsVerticalScrollIndicator={false}

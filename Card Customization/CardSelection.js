@@ -83,20 +83,18 @@ class CardSelection extends Component {
           console.log('Caurosel options', data.options[0].product_sku);
           global.selectedoptionId = data.options[0].option_id;
 
-
           firebaseanalytics.logEvent('Item_Detail', {
-            'Entry_Point': '',
-            'Item_Name':  data.options[0].product_sku,
-            'Item_Category':'',
-            'Item_Cost':'',
-            'Item_Rating':'',
-            'Suggested_Item?':'',
-            'Discount%':'',
-            'Sale_Item?':'',
-            'Item_Designer':'',
-            'Item_ID':'',
+            Entry_Point: '',
+            Item_Name: data.options[0].product_sku,
+            Item_Category: '',
+            Item_Cost: '',
+            Item_Rating: '',
+            'Suggested_Item?': '',
+            'Discount%': '',
+            'Sale_Item?': '',
+            Item_Designer: '',
+            Item_ID: '',
           });
-
 
           this.setState(
             {
@@ -116,7 +114,7 @@ class CardSelection extends Component {
       Alert.alert('Please select your cards Type.');
     } else {
       global.selectedoptionValue = this.state.selectedoptionValue;
-      this.props.navigation.navigate('FrontPageCarousel');
+      this.props.navigation.navigate('FrontPage');
     }
   }
 
@@ -133,25 +131,26 @@ class CardSelection extends Component {
       <TouchableOpacity
         activeOpacity={1}
         style={{
-          backgroundColor: 'white',
-          height: wp('60%'),
-          width: (SLIDER_WIDTH / 100) * 60,
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: wp('3%'),
-          top: hp('5%'),
-          elevation: 5,
-          left: wp('11%'),
+          backgroundColor: 'transparent',
+          flex: 1,
+          paddingHorizontal: 30,
+          paddingTop: 30
         }}>
-        <Image
-          resizeMode={'contain'}
-          style={{height: wp('65%'), width: '70%'}}
-          source={{
-            uri:
-              'https://haati.serverguy.cloud/pub/media/catalog/product/cache/2f5495530194a6c2c506712ad644ca4e' +
-              item.file,
-          }}
-        />
+        <View
+          style={{
+            backgroundColor: 'white',
+            paddingVertical: 10,
+          }}>
+          <Image
+            resizeMode={'contain'}
+            style={{height: '100%', width: '100%'}}
+            source={{
+              uri:
+                'https://haati.serverguy.cloud/pub/media/catalog/product/cache/2f5495530194a6c2c506712ad644ca4e' +
+                item.file,
+            }}
+          />
+        </View>
       </TouchableOpacity>
     );
   }
@@ -447,7 +446,7 @@ class CardSelection extends Component {
                 }
                 renderItem={this.cardimageRenderItem}
                 sliderWidth={SLIDER_WIDTH}
-                itemWidth={ITEM_WIDTH}
+                itemWidth={SLIDER_WIDTH}
                 inactiveSlideShift={0}
                 onSnapToItem={index => this.setState({activeimageSlide: index})}
               />
@@ -556,7 +555,7 @@ const styles = StyleSheet.create({
   },
   carouselContainer: {
     width: wp('100%'),
-    height: hp('45%'),
+    height: hp('55%'),
     backgroundColor: '#DEEBF6',
     borderTopRightRadius: 44,
   },

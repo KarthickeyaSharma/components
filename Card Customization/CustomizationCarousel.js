@@ -32,6 +32,7 @@ import Front from './Front';
 import Left from './Left';
 import Right from './Right';
 import Back from './Back';
+import KeyboardInput from '../demo/demoScreen';
 
 const requestCameraPermission = async () => {
   try {
@@ -66,17 +67,20 @@ class CustomizationCarousel extends Component {
     global.pdc_layout_ids = null;
     global.gcanvas_height = 1536;
     global.gcanvas_width = 1080;
-    this.child = React.createRef();
+    this.backChild = React.createRef();
+    this.leftChild = React.createRef();
+    this.rightChild = React.createRef();
     this.state = {
       show1: false,
       sliders: [
         <Front loadingContainer={styles.loadingContainer} />,
-        <Left keyboardHandler={this.keyboardHandler} />,
-        <Right keyboardHandler={this.keyboardHandler} />,
-        <Back ref={this.child} />,
+        <Left keyboardHandler={this.keyboardHandler} ref={this.leftChild} />,
+        <Right keyboardHandler={this.keyboardHandler} ref={this.rightChild} />,
+        <Back ref={this.backChild} />,
       ],
       activeSlide: 0,
       showKeyboard: false,
+      keyboardState: false,
     };
     this.closePreviewModal = this.closePreviewModal.bind(this);
   }
@@ -119,6 +123,11 @@ class CustomizationCarousel extends Component {
     ToastAndroid.show('Progress Saved Successfully.', ToastAndroid.SHORT);
     this.props.navigation.goBack();
     return true;
+  };
+
+  keyboardState = keyState => {
+    this.setState({keyboardState: keyState});
+    console.log(keyState, 'jjdjfhfhf');
   };
 
   checkPreview = () => {
@@ -248,7 +257,28 @@ class CustomizationCarousel extends Component {
             />
           </View>
         </ScrollView>
-        {this.state.activeSlide == 3 ? (
+        {(this.state.activeSlide == 1 || this.state.activeSlide == 2) &&
+        (this.state.showKeyboard || this.state.keyboardState) ? (
+          <View
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}>
+            <KeyboardInput
+              FuncInstance={
+                this.state.activeSlide == 1
+                  ? this.leftChild.current
+                  : this.state.activeSlide == 2
+                  ? this.rightChild.current
+                  : null
+              }
+              activeIndex={this.state.activeSlide}
+              keyboardState={this.keyboardState}
+            />
+          </View>
+        ) : this.state.activeSlide == 3 ? (
           <View
             style={{
               height: hp('10%'),
@@ -260,7 +290,7 @@ class CustomizationCarousel extends Component {
             <TouchableOpacity
               onPress={() => {
                 global.isPreview
-                  ? this.child.current.getAlert()
+                  ? this.backChild.current.getAlert()
                   : this.setState({show1: true});
               }}
               style={styles.addBtn}>
