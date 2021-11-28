@@ -68,7 +68,6 @@ class Left extends Component {
           : JSON.parse(result).findIndex(x => x.skuCName === global.skuCName);
       console.log(JSON.parse(result), 'pdc_datas');
       if (index == -1) {
-
         // var objs =layout3.objects ;
         // for (var pid in objs) {
         //   console.log(objs[pid]['type'], 'pids');
@@ -80,7 +79,7 @@ class Left extends Component {
         //   }
         // }
         // console.log(layout3,'1234');
-        
+
         this.setState({jsonData: JSON.stringify(layout2)});
       } else {
         if ('leftPage' in JSON.parse(result)[index]) {
@@ -93,20 +92,8 @@ class Left extends Component {
         console.log('leftPage' in JSON.parse(result)[index]);
       }
     });
-<<<<<<< Updated upstream
-    this._keyboadDidshowListener = Keyboard.addListener(
-      'keyboardDidShow',
-      () => {
-        // alert(1);
-        this.setState({
-          shouldShow: true,
-        });
-        this.props.keyboardHandler(true);
-      },
-=======
     this._keyboadDidshowListener = Keyboard.addListener('keyboardDidShow', () =>
       this.props.keyboardHandler(true),
->>>>>>> Stashed changes
     );
     this._keyboadDidhideListener = Keyboard.addListener('keyboardDidHide', () =>
       this.props.keyboardHandler(false),

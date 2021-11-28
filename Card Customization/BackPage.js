@@ -9,6 +9,7 @@ import {
   Alert,
   StyleSheet,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import HaatiText from '../../assets/hatti.png';
 import {
@@ -21,6 +22,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import CheckPreviewModal from '../Modals/CheckPreviewModal';
+import {getCustomizationItem} from '../Realm DB/realm';
 
 class BackPage extends Component {
   constructor(props) {
@@ -29,6 +31,7 @@ class BackPage extends Component {
       backImageResult: null,
       imageurl: null,
       showPreview: false,
+      showLoading: false,
     };
   }
 
@@ -39,143 +42,139 @@ class BackPage extends Component {
   }
 
   addToCart = () => {
+    // SHow Loading
+    this.setState({
+      showLoading: true,
+    });
+
     var frontId = pdc_layout_ids[0];
     global.frontId = frontId;
     var leftId = pdc_layout_ids[1];
     var rightId = pdc_layout_ids[2];
     console.log(leftId);
     console.log(global.product_id, 'helloooo');
-    AsyncStorage.getItem('pdc_designs').then(designs => {
-      var d = designs ? JSON.parse(designs) : [];
-      d = d.filter(e => global.skuCName.includes(e.skuCName));
-      // console.log(d[0].frontPage[0].pdc_json,"pdcs");
-      // console.log(global.pdc_response[frontId].json,"pdcs2");
-      console.log(JSON.parse(d[0].frontPage[0].pdc_json), 'pdcs3');
 
-      // Setting JSON file
-      global.pdc_response[frontId].json = JSON.parse(
-        d[0].frontPage[0].pdc_json,
-      );
+    const skuData = getCustomizationItem(global.skuCName)[0];
+    // Setting JSON file
+    global.pdc_response[frontId].json = JSON.parse(
+      JSON.parse(skuData.frontPage)[0].pdc_json,
+    );
 
-      // Converting cropzoomimage to image
-      var objs = global.pdc_response[frontId].json['objects'];
-      console.log(objs, 'bobjs');
-      for (var pid in objs) {
-        console.log(objs[pid]['type'], 'pids');
-        if (objs[pid]['type'] == 'cropzoomimage') {
-          objs[pid]['type'] = 'image';
-        }
+    // Converting cropzoomimage to image
+    var objs = global.pdc_response[frontId].json['objects'];
+    console.log(objs, 'bobjs');
+    for (var pid in objs) {
+      console.log(objs[pid]['type'], 'pids');
+      if (objs[pid]['type'] == 'cropzoomimage') {
+        objs[pid]['type'] = 'image';
+      } else if (objs[pid]['type'] == 'Textbox') {
+        objs[pid]['type'] = 'i-text';
       }
-      console.log(objs, 'aobjs');
-      console.log('pdcObjs', global.pdc_response[frontId].json);
+    }
+    console.log(objs, 'aobjs');
+    // console.log('pdcObjs', global.pdc_response[frontId].json);
 
-      // if category is invitation then don't do any operation on left and right page
-      if (CategoryName == 'Invitations') {
-      } else {
-        var jsonPages = JSON.stringify(d[0]);
-        jsonPages = JSON.parse(jsonPages);
-
-        // Checking if leftPage is customized or not
-        if ('leftPage' in jsonPages) {
-          // checking if response got from backend contains leftPage or not
-          // If contains then overwrite else create leftpage node
-          if (global.pdc_response[leftId].json == undefined) {
-            global.pdc_response[leftId]['json'] = JSON.parse(
-              d[0].leftPage[0].pdc_json,
-            );
-          } else {
-            global.pdc_response[leftId].json = JSON.parse(
-              d[0].leftPage[0].pdc_json,
-            );
-          }
-          // Converting cropzoomimage to image in Left Page
-          var objs = global.pdc_response[leftId].json['objects'];
-          console.log(objs, 'bobjs');
-          for (var pid in objs) {
-            console.log(objs[pid]['type'], 'pids');
-            if (objs[pid]['type'] == 'cropzoomimage') {
-              objs[pid]['type'] = 'image';
-            }
-          }
-          console.log(objs, 'aobjs');
-          console.log('pdcObjs', global.pdc_response[leftId].json);
+    // if category is invitation then don't do any operation on left and right page
+    if (CategoryName == 'Invitations') {
+    } else {
+      // Checking if leftPage is customized or not
+      if (skuData.leftPage != '') {
+        // checking if response got from backend contains leftPage or not
+        // If contains then overwrite else create leftpage node
+        if (global.pdc_response[leftId].json == undefined) {
+          global.pdc_response[leftId]['json'] = JSON.parse(
+            JSON.parse(skuData.leftPage)[0].pdc_json,
+          );
+        } else {
+          global.pdc_response[leftId].json = JSON.parse(
+            JSON.parse(skuData.leftPage)[0].pdc_json,
+          );
         }
-
-        // Checking if rightPage is customized or not
-        if ('rightPage' in jsonPages) {
-          // checking if response got from backend contains rightPage or not
-          // If contains then overwrite else create rightPage node
-          if (global.pdc_response[rightId].json == undefined) {
-            global.pdc_response[rightId]['json'] = JSON.parse(
-              d[0].rightPage[0].pdc_json,
-            );
-          } else {
-            global.pdc_response[rightId].json = JSON.parse(
-              d[0].rightPage[0].pdc_json,
-            );
+        // Converting cropzoomimage to image in Left Page
+        var objs = global.pdc_response[leftId].json['objects'];
+        console.log(objs, 'bobjs');
+        for (var pid in objs) {
+          console.log(objs[pid]['type'], 'pids');
+          if (objs[pid]['type'] == 'cropzoomimage') {
+            objs[pid]['type'] = 'image';
+          } else if (objs[pid]['type'] == 'Textbox') {
+            objs[pid]['type'] = 'i-text';
           }
-          // Converting cropzoomimage to image in Right Page
-          var objs = global.pdc_response[rightId].json['objects'];
-          console.log(objs, 'bobjs');
-          for (var pid in objs) {
-            console.log(objs[pid]['type'], 'pids');
-            if (objs[pid]['type'] == 'cropzoomimage') {
-              objs[pid]['type'] = 'image';
-            }
-          }
-          console.log(objs, 'aobjs');
-          console.log('pdcObjs', global.pdc_response[rightId].json);
         }
+        console.log(objs, 'aobjs');
+        // console.log('pdcObjs', global.pdc_response[leftId].json);
       }
 
-      // Setting SVG file
-      global.pdc_response[frontId].sideSvg = JSON.parse(
-        d[0].frontPage[1].pdc_svg,
-      );
-      // if category is invitation then don't do any operation on left and right page
-      if (CategoryName == 'Invitations') {
-      } else {
-        var svgPages = JSON.stringify(d[0]);
-        svgPages = JSON.parse(svgPages);
-
-        // Checking if leftPage is customized or not
-        if ('leftPage' in jsonPages) {
-          // checking if response got from backend contains leftPage or not
-          // If contains then overwrite else create leftpage node
-          if (global.pdc_response[leftId].sideSvg == undefined) {
-            global.pdc_response[leftId]['sideSvg'] = JSON.parse(
-              d[0].leftPage[1].pdc_svg,
-            );
-          } else {
-            global.pdc_response[leftId].sideSvg = JSON.parse(
-              d[0].leftPage[1].pdc_svg,
-            );
+      // Checking if rightPage is customized or not
+      if (skuData.rightPage != '') {
+        // checking if response got from backend contains rightPage or not
+        // If contains then overwrite else create rightPage node
+        if (global.pdc_response[rightId].json == undefined) {
+          global.pdc_response[rightId]['json'] = JSON.parse(
+            JSON.parse(skuData.rightPage)[0].pdc_json,
+          );
+        } else {
+          global.pdc_response[rightId].json = JSON.parse(
+            JSON.parse(skuData.rightPage)[0].pdc_json,
+          );
+        }
+        // Converting cropzoomimage to image in Right Page
+        var objs = global.pdc_response[rightId].json['objects'];
+        console.log(objs, 'bobjs');
+        for (var pid in objs) {
+          console.log(objs[pid]['type'], 'pids');
+          if (objs[pid]['type'] == 'cropzoomimage') {
+            objs[pid]['type'] = 'image';
+          } else if (objs[pid]['type'] == 'Textbox') {
+            objs[pid]['type'] = 'i-text';
           }
         }
+        console.log(objs, 'aobjs');
+        // console.log('pdcObjs', global.pdc_response[rightId].json);
+      }
+    }
 
-        // Checking if rightPage is customized or not
-        if ('rightPage' in svgPages) {
-          // checking if response got from backend contains rightPage or not
-          // If contains then overwrite else create rightPage node
-          if (global.pdc_response[rightId].sideSvg == undefined) {
-            global.pdc_response[rightId]['sideSvg'] = JSON.parse(
-              d[0].rightPage[1].pdc_svg,
-            );
-          } else {
-            global.pdc_response[rightId].sideSvg = JSON.parse(
-              d[0].rightPage[1].pdc_svg,
-            );
-          }
+    // Setting SVG file
+    global.pdc_response[frontId].sideSvg = JSON.parse(
+      JSON.parse(skuData.frontPage)[1].pdc_svg,
+    );
+    // if category is invitation then don't do any operation on left and right page
+    if (CategoryName == 'Invitations') {
+    } else {
+      // Checking if leftPage is customized or not
+      if (skuData.leftPage != '') {
+        // checking if response got from backend contains leftPage or not
+        // If contains then overwrite else create leftpage node
+        if (global.pdc_response[leftId].sideSvg == undefined) {
+          global.pdc_response[leftId]['sideSvg'] = JSON.parse(
+            JSON.parse(skuData.leftPage)[1].pdc_svg,
+          );
+        } else {
+          global.pdc_response[leftId].sideSvg = JSON.parse(
+            JSON.parse(skuData.leftPage)[1].pdc_svg,
+          );
         }
       }
 
-      // Console OUTPUT
-      console.log(JSON.stringify(global.pdc_response), 'pdcs4_repsonse');
-      // JSON.stringify(pdc_response[frontId].json) = d[0].frontPage[0].pdc_json
-      // console.log(JSON.stringify(pdc_response[frontId].json),"checkpdcs");
-      // AsyncStorage.setItem('pdc_designs', JSON.stringify(d));
-      this.handleQuoteid();
-    });
+      // Checking if rightPage is customized or not
+      if (skuData.rightPage != '') {
+        // checking if response got from backend contains rightPage or not
+        // If contains then overwrite else create rightPage node
+        if (global.pdc_response[rightId].sideSvg == undefined) {
+          global.pdc_response[rightId]['sideSvg'] = JSON.parse(
+            JSON.parse(skuData.rightPage)[1].pdc_svg,
+          );
+        } else {
+          global.pdc_response[rightId].sideSvg = JSON.parse(
+            JSON.parse(skuData.rightPage)[1].pdc_svg,
+          );
+        }
+      }
+    }
+
+    // Console OUTPUT
+    // console.log(JSON.stringify(global.pdc_response), 'pdcs4_repsonse');
+    this.handleQuoteid();
   };
 
   BackCoverMethod() {
@@ -604,9 +603,10 @@ class BackPage extends Component {
           <TouchableOpacity
             onPress={() => {
               global.isPreview
-                ? alert('Work is still in progress')
+                ? this.addToCart()
                 : this.setState({showPreview: true});
             }}
+            disabled={this.state.showLoading}
             style={styles.addBtn}>
             <Text
               style={{
@@ -614,8 +614,11 @@ class BackPage extends Component {
                 fontSize: 16,
                 fontFamily: 'BalooBhai2-SemiBold',
               }}>
-              Add To Basket
+              {this.state.showLoading ? 'Adding..' : 'Add To Basket'}
             </Text>
+            {this.state.showLoading ? (
+              <ActivityIndicator style={{marginLeft: 20}} color={'white'} />
+            ) : null}
           </TouchableOpacity>
         </View>
       </View>
@@ -735,6 +738,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#E73A5E',
     borderRadius: 50,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
   },
 });
 export default BackPage;

@@ -9,6 +9,7 @@ import {
   Image,
   ScrollView,
   Keyboard,
+  BackHandler,
 } from 'react-native';
 const {height, width} = Dimensions.get('window');
 import HaatiText from '../../assets/hatti.png';
@@ -24,6 +25,13 @@ import CameraImage from '../../assets/img/camera1.png';
 
 import ResumeModal from '../Modals/ResumeModal';
 import CheckPreviewModal from '../Modals/CheckPreviewModal';
+import {
+  createCustomizationItem,
+  deleteCustomizationItem,
+  getCustomizationItem,
+  updateFrontItem,
+  updatePreview,
+} from '../Realm DB/realm';
 
 var ScriptStyle = '';
 class FrontPage extends Component {
@@ -31,7 +39,7 @@ class FrontPage extends Component {
     super(props);
     global.pdc_data = '';
     global.pdc_actual_data = [];
-    global.isPreview = true;
+    global.isPreview = false;
     global.pdc_response = null;
     global.pdc_layout_ids = null;
     global.gcanvas_height = 1536;
@@ -66,12 +74,19 @@ class FrontPage extends Component {
         showKeyboard: false,
       }),
     );
+    BackHandler.addEventListener('hardwareBackPress', this.handleBackButton);
   }
 
   componentWillUnmount() {
     this._keyboadDidshowListener.remove();
     this._keyboadDidhideListener.remove();
+    BackHandler.removeEventListener('hardwareBackPress', this.handleBackButton);
   }
+
+  handleBackButton = () => {
+    this.props.navigation.goBack();
+    return true;
+  };
 
   frontPageSku = () => {
     NetInfo.fetch().then(state => {
@@ -110,7 +125,17 @@ class FrontPage extends Component {
           resultdataNew.push(postData[1]);
         });
 
-        this.setState({frontArray: resultdataNew}, () => {});
+        global.gcanvas_width = JsonResponse[global.json_id_front].canvaswidth;
+        global.gcanvas_height = JsonResponse[global.json_id_front].canvasheight;
+        this.setState({
+          selectImageFront: JsonResponse,
+          selectedJson: JsonResponse[global.json_id_front].json,
+          isLoading: false,
+          canvas_width: JsonResponse[global.json_id_front].canvaswidth,
+          canvas_height: JsonResponse[global.json_id_front].canvasheight,
+          frontArray: resultdataNew,
+        });
+
         var dataIds = [];
         for (var key in JSON.stringify(JsonResponse)) {
           if (JsonResponse.hasOwnProperty(key)) {
@@ -137,47 +162,30 @@ class FrontPage extends Component {
           'jsondatakjkfjfkgjk',
           JSON.stringify(JsonResponse[global.json_id_front].json),
         );
-        AsyncStorage.getItem('pdc_designs', (err, result) => {
-          const index =
-            result == null
-              ? -1
-              : JSON.parse(result).findIndex(x => x.skuCName === skuCName);
-          // console.log(JSON.parse(result)[index].frontPage[0].pdc_json,"pdc_datas");
 
-          if (parseInt(index) == -1) {
-            this.setjsonData('online');
+        if (getCustomizationItem(skuCName).isEmpty()) {
+          this.setjsonData('empty');
+        } else {
+          const skuData = getCustomizationItem(skuCName)[0];
+          if ('frontPage' in skuData) {
+            this.setState({
+              local_pdc: JSON.parse(skuData.frontPage)[0].pdc_json,
+              show: true,
+            });
+            global.isPreview = skuData.hasPreview;
           } else {
-            if ('frontPage' in JSON.parse(result)[index]) {
-              this.setState({
-                local_pdc: JSON.parse(result)[index].frontPage[0].pdc_json,
-              });
-              global.isPreview = true;
-              // JSON.parse(result)[index].preview == undefined
-              //   ? false
-              //   : JSON.parse(result)[index].preview;
-            } else {
-              global.isPreview = true; //false;
-              this.setjsonData('online');
-            }
-            console.log('leftPage' in JSON.parse(result)[index]);
+            global.isPreview = false;
+            this.setjsonData('online');
           }
+          console.log('leftPage' in skuData);
+        }
 
-          if (CategoryName == 'Invitations') {
-            setTimeout(() => {
-              this.sendMessageToWebFront();
-              global.isPreview = true;
-            }, 2000);
-          }
-        });
-        global.gcanvas_width = JsonResponse[global.json_id_front].canvaswidth;
-        global.gcanvas_height = JsonResponse[global.json_id_front].canvasheight;
-        this.setState({
-          selectImageFront: JsonResponse,
-          selectedJson: JsonResponse[global.json_id_front].json,
-          isLoading: false,
-          canvas_width: JsonResponse[global.json_id_front].canvaswidth,
-          canvas_height: JsonResponse[global.json_id_front].canvasheight,
-        });
+        if (CategoryName == 'Invitations') {
+          setTimeout(() => {
+            this.sendMessageToWebFront();
+            global.isPreview = true;
+          }, 2000);
+        }
       });
     // }))
   };
@@ -185,22 +193,26 @@ class FrontPage extends Component {
   onMessage = data => {
     var mData = JSON.parse(data.nativeEvent.data);
     var jsonfile = mData.jsonfile;
-
     var svgfile = mData.svgfile;
     console.log(mData, 'onMessage');
+
     if (typeof mData === 'object') {
       if ('preview' in mData) {
-        this.savePreview(mData.preview);
-        global.isPreview = true; //mData.preview;
+        updatePreview(skuCName, mData.preview);
+        global.isPreview = mData.preview; //mData.preview;
         this.sendMessageToWebFront();
       } else {
-        const pdc_data = {
-          skuCName: skuCName,
-          frontPage: [{pdc_json: jsonfile}, {pdc_svg: svgfile}],
-        };
-        global.pdc_data = pdc_data;
         global.pdc_actual_data = [{pdc_json: jsonfile}, {pdc_svg: svgfile}];
-        this.savePDCs();
+        if (getCustomizationItem(skuCName).isEmpty()) {
+          createCustomizationItem(
+            skuCName,
+            JSON.stringify(pdc_actual_data),
+            '',
+            '',
+          );
+        } else {
+          updateFrontItem(skuCName, JSON.stringify(pdc_actual_data));
+        }
       }
     }
   };
@@ -213,47 +225,9 @@ class FrontPage extends Component {
                 `);
   };
 
-  savePDCs = () => {
-    AsyncStorage.getItem('pdc_designs').then(designs => {
-      const d = designs ? JSON.parse(designs) : [];
-      const index = d.findIndex(x => x.skuCName === skuCName);
-      if (parseInt(index) == -1) {
-        console.log(-1);
-        d.push(pdc_data);
-      } else {
-        console.log(index);
-        d[index]['frontPage'] = pdc_actual_data;
-      }
-      console.log(d, 'pdc_data');
-      AsyncStorage.setItem('pdc_designs', JSON.stringify(d));
-    });
-  };
-
-  savePreview = boolValue => {
-    AsyncStorage.getItem('pdc_designs').then(designs => {
-      const d = designs ? JSON.parse(designs) : [];
-      const index = d.findIndex(x => x.skuCName === skuCName);
-      const preview_data = {
-        skuCName: skuCName,
-        preview: boolValue,
-      };
-      if (parseInt(index) == -1) {
-        d.push(preview_data);
-      } else {
-        console.log(index);
-        d[index]['preview'] = boolValue;
-      }
-      AsyncStorage.setItem('pdc_designs', JSON.stringify(d));
-    });
-  };
-
   setjsonData = async type => {
     if (type == 'online') {
-      AsyncStorage.getItem('pdc_designs').then(designs => {
-        var d = designs ? JSON.parse(designs) : [];
-        d = d.filter(e => !skuCName.includes(e.skuCName));
-        AsyncStorage.setItem('pdc_designs', JSON.stringify(d));
-      });
+      deleteCustomizationItem(skuCName);
     } else {
       // global.isResumed = true;
     }
@@ -321,7 +295,9 @@ class FrontPage extends Component {
 
     // var objs = this.state.selectedJson.json['objects'];
     this.setState({
-      jsonData: JSON.stringify(type == 'online' ? Jsonselected : pdcLocal),
+      jsonData: JSON.stringify(
+        type == 'online' || type == 'empty' ? Jsonselected : pdcLocal,
+      ),
       show: false,
     });
   };
@@ -878,6 +854,23 @@ class FrontPage extends Component {
                       var datas = { "jsonfile": JSON.stringify(json), "svgfile": JSON.stringify(svg) };
                       window.ReactNativeWebView.postMessage(JSON.stringify(datas));
                   });
+
+                  $("#addtocart").click(function() {
+                    obj = canvas.getObjects();
+                    k=0;
+                    console.log(obj);
+                    obj.forEach(function(item, i) {
+                      console.log(item.type);
+                      if(item.type=="cropzoomimage" && item.name!=undefined && item.opacity!=1){
+                        k=k+1;
+                      }
+                    });
+                    if(k>=1) {
+                      window.ReactNativeWebView.postMessage(JSON.stringify({preview: false}));
+                    } else {
+                      window.ReactNativeWebView.postMessage(JSON.stringify({preview: true}));
+                    }
+                  });
                           
                   var data = JSON.stringify(${this.state.jsonData}); 
                   canvas.loadFromJSON(JSON.parse(data), function () {
@@ -1042,6 +1035,7 @@ class FrontPage extends Component {
                         });
                         $('.preloader').css('display','none');
                         setTimeout(function(){ $("#canvas2json").click(); }, 2000);
+                        setTimeout(function(){ $("#addtocart").click(); }, 2500);
                       }
                     }
                     reader1.readAsDataURL(file);
@@ -1058,7 +1052,7 @@ class FrontPage extends Component {
                 }}
                 renderLoading={() => {
                   return (
-                    <View style={this.props.loadingContainer}>
+                    <View style={styles.loadingContainer}>
                       <ActivityIndicator size={hp('6%')} color={'red'} />
                     </View>
                   );

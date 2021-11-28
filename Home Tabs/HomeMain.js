@@ -20,6 +20,12 @@ import {
 const {width, height} = Dimensions.get('window');
 import HaatiText from '../../assets/hatti.png';
 import Search from '../../assets/search.png';
+import {
+  getCustomizationItem,
+  getCustomizationItems,
+  createCustomizationItem,
+  updateFrontItem,
+} from '../Realm DB/realm';
 var firebaseanalytics = require('react-native-firebase-analytics');
 
 class HomeMain extends Component {
@@ -37,6 +43,11 @@ class HomeMain extends Component {
 
   componentDidMount() {
     this.CategoryList();
+    // updateFrontItem('Testings', JSON.stringify({item: 'hi hello bro'}));
+    // createCustomizationItem('Testing', 'updates', 'check','ji');
+    // deleteCustomizationItem('Testings');
+    // console.log('leftPage' in getCustomizationItems('Testings')[0]);
+    console.log(getCustomizationItem('Testings').isEmpty());
     BackHandler.addEventListener('hardwareBackPress', this.handleBackButton);
   }
 
@@ -109,68 +120,69 @@ class HomeMain extends Component {
   };
 
   changeText(searchtext) {
-    if(searchtext!='')
-    {
-    console.log('one : '+this.state.searchresult[0].name);
-    var dataResult = this.state.searchresult;
-    dataResult.forEach((element, index) => {
-      console.log(element.name);
-      if(element.name=='For Her' ||element.name == 'For Him' || element.name == 'For Kids')
-      {
-      var items =
-        element.name == 'For Her' ||
-        element.name == 'For Him' ||
-        element.name == 'For Kids'
-          ? 'Birthday Cards ' + element.name
-          : element.name == 'Cards'
-          ? 'Other ' + element.name
-          : element.name;
-      dataResult[index].name = items;
-      // console.log('Index : '+index);
-      }
-    });
-   
-    console.log('ssssssssssssssss', dataResult);
-    let items = searchtext;
-    if (items.length > 0) {
-      if (this.state.searchresult != null) {
-        this.setState({
-          searchFindresult:  []
-        },()=>
-        {
+    if (searchtext != '') {
+      console.log('one : ' + this.state.searchresult[0].name);
+      var dataResult = this.state.searchresult;
+      dataResult.forEach((element, index) => {
+        console.log(element.name);
+        if (
+          element.name == 'For Her' ||
+          element.name == 'For Him' ||
+          element.name == 'For Kids'
+        ) {
+          var items =
+            element.name == 'For Her' ||
+            element.name == 'For Him' ||
+            element.name == 'For Kids'
+              ? 'Birthday Cards ' + element.name
+              : element.name == 'Cards'
+              ? 'Other ' + element.name
+              : element.name;
+          dataResult[index].name = items;
+          // console.log('Index : '+index);
+        }
+      });
 
-          console.log(dataResult.filter(item =>
-            item.name.toLowerCase().includes(items.toLowerCase()),
-          ))
-          this.setState({
-            searchFindresult:  dataResult.filter(item =>
+      console.log('ssssssssssssssss', dataResult);
+      let items = searchtext;
+      if (items.length > 0) {
+        if (this.state.searchresult != null) {
+          this.setState(
+            {
+              searchFindresult: [],
+            },
+            () => {
+              console.log(
+                dataResult.filter(item =>
+                  item.name.toLowerCase().includes(items.toLowerCase()),
+                ),
+              );
+              this.setState({
+                searchFindresult: dataResult.filter(item =>
+                  item.name.toLowerCase().includes(items.toLowerCase()),
+                ),
+              });
+            },
+          );
+
+          firebaseanalytics.logEvent('Category_Search', {
+            Searchtext: items,
+            Search_Result: dataResult.filter(item =>
               item.name.toLowerCase().includes(items.toLowerCase()),
-            ) 
-          })
-        })
-       
-        
-        
-        firebaseanalytics.logEvent('Category_Search', {
-          'Searchtext': items,
-          'Search_Result':  dataResult.filter(item =>
-            item.name.toLowerCase().includes(items.toLowerCase()),
-          ),
-          'Searchtext_Length':searchtext.length,
-        });
-        this.setState({searchtext: searchtext});
+            ),
+            Searchtext_Length: searchtext.length,
+          });
+          this.setState({searchtext: searchtext});
+        }
+      } else {
+        // this.state.search = [];
+        this.CategoryList;
       }
+      // this.setState({searchtext: searchtext});
     } else {
-      // this.state.search = [];
+      this.setState({searchtext: searchtext});
       this.CategoryList;
     }
-    // this.setState({searchtext: searchtext});
-  }
-  else
-  {
-    this.setState({searchtext: searchtext});
-    this.CategoryList;
-  }
   }
 
   render() {
@@ -261,7 +273,7 @@ const styles = StyleSheet.create({
   w30: {
     width: wp('30%'),
     paddingLeft: 10,
-    paddingRight: 10
+    paddingRight: 10,
   },
   title: {
     width: 100,

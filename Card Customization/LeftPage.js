@@ -41,6 +41,11 @@ import layout4 from '../../assets/layouts/layout4.json';
 import layout5 from '../../assets/layouts/layout5.json';
 
 import KeyboardInput from '../demo/demoScreen';
+import {
+  createCustomizationItem,
+  getCustomizationItem,
+  updateLeftItem,
+} from '../Realm DB/realm';
 
 class LeftPage extends Component {
   constructor(props) {
@@ -65,25 +70,19 @@ class LeftPage extends Component {
   }
 
   componentDidMount = () => {
-    AsyncStorage.getItem('pdc_designs', (err, result) => {
-      const index =
-        result == null || undefined
-          ? -1
-          : JSON.parse(result).findIndex(x => x.skuCName === global.skuCName);
-      console.log(JSON.parse(result), 'pdc_datas');
-      if (index == -1) {
+    if (getCustomizationItem(global.skuCName).isEmpty()) {
+      this.setState({jsonData: JSON.stringify(layout2)});
+    } else {
+      const skuData = getCustomizationItem(global.skuCName)[0];
+      if (skuData.leftPage == '') {
         this.setState({jsonData: JSON.stringify(layout2)});
       } else {
-        if ('leftPage' in JSON.parse(result)[index]) {
-          this.setState({
-            jsonData: JSON.parse(result)[index].leftPage[0].pdc_json,
-          });
-        } else {
-          this.setState({jsonData: JSON.stringify(layout2)});
-        }
-        console.log('leftPage' in JSON.parse(result)[index]);
+        this.setState({
+          jsonData: JSON.parse(skuData.leftPage)[0].pdc_json,
+        });
       }
-    });
+    }
+
     this._keyboadDidshowListener = Keyboard.addListener('keyboardDidShow', () =>
       this.keyboardHandler(true),
     );
@@ -99,29 +98,22 @@ class LeftPage extends Component {
     });
   };
 
+  handleBackButton = () => {
+    this.props.navigation.goBack();
+    return true;
+  };
+
   onMessage(data) {
     var mData = JSON.parse(data.nativeEvent.data);
     var jsonfile = mData.jsonfile;
     var svgfile = mData.svgfile;
     console.log(mData, 'onMessage');
-    const pdc_data = {
-      skuCName: skuCName,
-      leftPage: [{pdc_json: jsonfile}, {pdc_svg: svgfile}],
-    };
-
-    AsyncStorage.getItem('pdc_designs').then(designs => {
-      const d = designs ? JSON.parse(designs) : [];
-      const index = d.findIndex(x => x.skuCName === global.skuCName);
-      console.log(d[index]);
-      if (parseInt(index) == -1) {
-        console.log(-1);
-        d.push(pdc_data);
-      } else {
-        console.log(index);
-        d[index]['leftPage'] = [{pdc_json: jsonfile}, {pdc_svg: svgfile}];
-      }
-      AsyncStorage.setItem('pdc_designs', JSON.stringify(d));
-    });
+    const pdc_data = [{pdc_json: jsonfile}, {pdc_svg: svgfile}];
+    if (getCustomizationItem(global.skuCName).isEmpty()) {
+      createCustomizationItem(skuCName, '', JSON.stringify(pdc_data), '');
+    } else {
+      updateLeftItem(skuCName, JSON.stringify(pdc_data));
+    }
   }
 
   sendMessageToWebLeft = () => {
@@ -1120,7 +1112,11 @@ class LeftPage extends Component {
               justifyContent: 'space-between',
               alignItems: 'center',
             }}>
-            <View style={{width: '30%'}}></View>
+            <View style={{width: '30%'}}>
+              <TouchableOpacity onPress={() => this.handleBackButton()}>
+                <Text style={[styles.backText, {color: '#E280AA'}]}>PREV</Text>
+              </TouchableOpacity>
+            </View>
             <View
               style={{
                 width: '40%',
